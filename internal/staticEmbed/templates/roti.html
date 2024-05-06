@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link href="/static/simple.css" type="text/css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" media="screen" href="/static/Luciole-Regular.css" />
+        <title>🍖 - ROTI {{.Id}} - 🍖</title>
+    </head>
+    <body>
+        <h2>🍖 - ROTI {{.Id}} - 🍖</h2>
+        {{ if .Description}}
+        <h3>Meeting: {{.Description}}</h3>
+        {{ end }}
+        <h4 style="margin-top: 0px;">Average ROTI: {{.Avg}} | Min: {{.Min}} | Max: {{.Max}}</h4>
+        <h4 style="margin-top: 0px;">Number of votes: {{.NumVotes}}</h4>
+
+        {{ if .Feedbacks }}
+        <h4>Feedbacks:</h4>
+        <ul style="margin-top: 0px;">
+            {{range .Feedbacks}}
+            <li style="overflow: auto;">{{ . }}</li>
+            {{end}}
+        </ul>
+        {{ end }}
+
+        {{ if .UserHasVoted }}
+        <input type="submit" value="You voted. Thanks!" style="font-size: 1.5rem; background-color: grey;" disabled>
+        {{ else }}
+        <form method="POST" action="/displayvote/{{.Id}}">
+            <input type="submit" value="Vote" style="font-size: 1.5rem;">
+        </form>
+        {{ end }}
+
+        <p style="margin-bottom: 0px;">Scan this QR-code to access this page:</p>
+        <img id='flag' src='/qr/qr{{.Id}}.png'>
+        
+        <div>Direct link to voting page: <a href="{{.Url}}/roti/{{.Id}}">{{.Url}}/roti/{{.Id}}</a></div>
+        <div>Download ROTI {{.Id}} results: <a href="/downpng/{{.Id}}">as PNG</a> / <a href="/downcsv/{{.Id}}">as CSV</a></div>
+        <a class="back-to-index" href="/">Or go back to home 🏠</a>
+
+        <!-- Footer -->
+        <footer>
+            Version: {{ .Version }} - made with love 💜 by <a href="https://github.com/deezer">@DeezerDevs</a>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,21 @@
+{{- if .Values.serviceMonitor.create -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "groroti.fullname" . }}
+  labels:
+    {{- include "groroti.labels" . | nindent 4 }}
+spec:
+  endpoints:
+  - interval: 30s
+    path: /-/metrics
+    port: http
+    scheme: http
+    scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "groroti.labels" . | nindent 6 }}
+{{- end }}

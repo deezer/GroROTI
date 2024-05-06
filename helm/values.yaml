@@ -1,0 +1,64 @@
+replicaCount: 1
+
+image:
+  repository: docker.io/deezer/groroti
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  # tag: "latest"
+
+serviceAccount:
+  create: true
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  # readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+frontendURL: https://groroti.domain.tld
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: groroti.domain.tld
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+# you need to have the serviceMonitor CRDs to allow this
+serviceMonitor:
+  create: false
+
+persistentVolume:
+  enabled: false
+  size: 1G
+  accessModes:
+    - ReadWriteOnce
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

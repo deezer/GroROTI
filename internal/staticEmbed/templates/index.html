@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link href="/static/simple.css" type="text/css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" media="screen" href="/static/Luciole-Regular.css" />
+        <title>🍖 - GroROTI - 🍖</title>
+        <meta name="title" property="og:title" content="🍖 - GroROTI - 🍖">
+        <meta name="description"  property="og.description" content="GroROTI (Go Return On Time Invested) is a tool to gauge the quality of meetings, workshops, trainings. It's anonymous so people don't get biaised by seeing other people votes like in raised-hands ROTIs.">
+        <meta name="image" property="og:image" content="/static/groroti-logo.png">
+    </head>
+    <body>
+        <h2>🍖 - GroROTI - 🍖</h2>
+    
+        <p>GroROTI (Return On Time Invested) is a tool to gauge the quality of meetings, workshops, trainings. It's anonymous so people don't get biased seeing other's votes.</p>
+    
+        <form method="POST" action="/newroti">
+            <input type="text" id="rotiname" name="rotiname" placeholder="optional description">
+            <div>
+                <input type="checkbox" id="hide" name="hide">
+                <label for="hide">Hide this ROTI</label>
+            </div>
+            <div>
+                <input type="checkbox" id="feedback" name="feedback" checked />
+                <label for="feedback">Enable feedback textbox</label>
+            </div>
+            <input type="submit" value="Create ROTI" />
+        </form>
+
+        <h4>Getting started 🏁</h4>
+        <ol style="margin-top: 0px;">
+            <li>Create a new ROTI</li>
+            <li>Let people vote using the link (or scan the QR code)</li>
+            <li>Get the results
+        </ol>
+
+        <h4>Latest ROTIs</h4>
+        <ul style="margin-top: 0px;">
+            {{range .List}}
+            <li><a href="/roti/{{.ID}}">{{.ID}}{{ if .Desc}} - {{.Desc}}{{ end }}</a></li>
+            {{end}}
+        </ul>
+
+        <!-- Footer -->
+        <footer>
+            Version: {{ .Version }} - made with love 💜 by <a href="https://github.com/deezer">@DeezerDevs</a>
+        </footer>
+    </body>
+</html>

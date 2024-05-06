@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link href="/static/simple.css" type="text/css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" media="screen" href="/static/Luciole-Regular.css" />
+        <title>🍖 - Vote for {{.RotiID}} - 🍖</title>
+    </head>
+    <body>
+        <h2>🍖 - ROTI {{.RotiID}} - 🍖</h2>
+        {{ if .Description}}
+        <h3>Meeting: {{.Description}}</h3>
+        {{ end }}
+        <form method="POST" action="/vote/{{.RotiID}}">
+            <div>
+                <input type="range" name="vote" value="3" min="1" max="5" step="{{.VoteStep}}" oninput="this.nextElementSibling.value = this.value" style="width:50%; margin-bottom:0; line-height:0"><output style="font-size: 2rem; text-align: right; display:inline-block; width:9%; line-height:0">3</output>
+            </div>
+            {{ if .HasFeedback}}
+            <div>
+                <label for="feedback">Optional feedback:</label>
+                <textarea name="feedback" id="feedback" rows="1" cols="50"></textarea>
+            </div>
+            {{ end }}
+            <input type="submit" value="Vote!" style="font-size: 1.5rem"/>
+        </form>
+
+        <p>Can you help us rate this meeting/training/session value? Just answer this simple question: could you have brought/gained more value by doing <i>something else</i>?</p>
+        <ul style="margin-top: 0px;">
+            <li>If it was a complete waste of your time, give us a 1</li>
+            <li>If you can't imagine yourself doing anything more useful than this, give us a 5</li>
+            <li>If it was useful but you feel you could have done better, give a mark in between</li>
+        </ul>
+
+        <a class="back-to-roti" href="/roti/{{.RotiID}}">Back to ROTI {{.RotiID}} results</a>
+
+        <!-- Footer -->
+        <footer>
+            Version: {{ .Version }} - made with love 💜 by <a href="https://github.com/deezer">@DeezerDevs</a>
+        </footer>
+    </body>
+</html>    

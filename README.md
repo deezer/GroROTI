@@ -126,3 +126,7 @@ Deploy on clever cloud
 ```bash
 clever deploy
 ```
+
+## Additionnal licences
+
+fonts Luciole under Creative Commons Attribution 4.0 International Public License, © Laurent Bourcellier & Jonathan Perez. See [Read Me.txt](internal/staticEmbed/static/Read Me.txt).
