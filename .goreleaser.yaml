@@ -1,0 +1,47 @@
+before:
+  hooks:
+    - go mod tidy
+    - go test
+builds:
+  # https://goreleaser.com/customization/build/
+  - binary: groroti
+    goos:
+      - linux
+    goarch:
+      - amd64
+    ldflags:
+      - -extldflags "-static"
+      - -X main.Version={{.Version}}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+dockers:
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "deezer/groroti:{{ .Version }}-amd64"
+      - "deezer/groroti:latest-amd64"
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title=groroti"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+    extra_files:
+      - config.toml
+docker_manifests:
+  # https://goreleaser.com/customization/docker_manifest/
+  - name_template: deezer/groroti:{{.Version}}
+    image_templates:
+      - deezer/groroti:{{.Version}}-amd64
+  - name_template: deezer/groroti:latest
+    image_templates:
+      - deezer/groroti:latest-amd64
+checksum:
+  # https://goreleaser.com/customization/checksum/
+  name_template: 'checksums.txt'
+snapshot:
+  # https://goreleaser.com/customization/snapshots/
+  name_template: "{{ incpatch .Version }}-SNAPSHOT"
+source:
+  # https://goreleaser.com/customization/source/
+  enabled: true
