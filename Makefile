@@ -14,8 +14,8 @@ build:
 	go build -o ${BINARY} -ldflags "-extldflags '-static' -X main.Version=$$VERSION" main.go
 
 dockerbuild: build
-	docker build -t docker.io/deezer/groroti:latest --build-arg VERSION=$$VERSION .
-	docker build -t docker.io/deezer/groroti:$$VERSION --build-arg VERSION=$$VERSION .
+	docker build -t deezer/groroti:latest --build-arg VERSION=$$VERSION .
+	docker build -t deezer/groroti:$$VERSION --build-arg VERSION=$$VERSION .
 
 dockerrun:
-	docker run -p 3000:3000 docker.io/deezer/groroti:latest
+	docker run -p 3000:3000 deezer/groroti:latest
