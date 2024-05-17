@@ -19,8 +19,8 @@ dockers:
     goos: linux
     goarch: amd64
     image_templates:
-      - "deezer/groroti:{{ .Version }}-amd64"
-      - "deezer/groroti:latest-amd64"
+      - "deezer/groroti:{{ .Version }}"
+      - "deezer/groroti:latest"
     build_flag_templates:
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -33,8 +33,8 @@ dockers:
     goos: linux
     goarch: arm64
     image_templates:
-      - "deezer/groroti:{{ .Version }}-arm64"
-      - "deezer/groroti:latest-arm64"
+      - "deezer/groroti:{{ .Version }}"
+      - "deezer/groroti:latest"
     build_flag_templates:
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -43,20 +43,6 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
     extra_files:
       - config.toml
-docker_manifests:
-  # https://goreleaser.com/customization/docker_manifest/
-  - name_template: deezer/groroti:{{.Version}}
-    image_templates:
-      - deezer/groroti:{{.Version}}-amd64
-  - name_template: deezer/groroti:latest
-    image_templates:
-      - deezer/groroti:latest-amd64
-  - name_template: deezer/groroti:{{.Version}}
-    image_templates:
-      - deezer/groroti:{{.Version}}-arm64
-  - name_template: deezer/groroti:latest
-    image_templates:
-      - deezer/groroti:latest-arm64
 checksum:
   # https://goreleaser.com/customization/checksum/
   name_template: 'checksums.txt'
