@@ -8,7 +8,7 @@ The UI and functionalities are really basic. Here is a quick overview:
 * Enable / disable textbox feedbacks in votes with a checkbox
 * share the link (or QR code) with people that need to vote
 * by default, ROTIs are cleaned 30 days after creation
-* golang, http and groroti metrics are exposed on `/-/metrics` path
+* golang (memory, gc...), http (latency, codes...) and groroti metrics are exposed on `/-/metrics` path
 * export ROTI results with a csv or a PNG file
 
 | <img src="binaries/home.png"> | <img src="binaries/vote.png"> |
