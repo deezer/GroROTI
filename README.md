@@ -4,11 +4,9 @@ Open source repository of G(r)oROTI 🍖, a selfhosted **Return On Time Invested
 
 The UI and functionalities are really basic. Just create a ROTI, give the link (or QR code) to people that will vote, and wait for results !
 
-<img src="binaries/home.png" width="400">
-
-<img src="binaries/vote.png" width="400">
-
-<img src="binaries/roti.png" width="400">
+| <img src="binaries/home.png"> | <img src="binaries/vote.png"> |
+| -------- | ------- |
+| <img src="binaries/roti.png"> |  |
 
 ## Run it!
 
