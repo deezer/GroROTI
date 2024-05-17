@@ -2,11 +2,18 @@
 
 Open source repository of G(r)oROTI 🍖, a selfhosted **Return On Time Invested** web application written in Go
 
-The UI and functionalities are really basic. Just create a ROTI, give the link (or QR code) to people that will vote, and wait for results !
+The UI and functionalities are really basic. Here is a quick overview:
+* create an anonymous ROTI in seconds
+* find latest ROTIs in homepage (can be disabled with "Hide this ROTI" checkbox)
+* Enable / disable textbox feedbacks in votes with a checkbox
+* share the link (or QR code) with people that need to vote
+* by default, ROTIs are cleaned 30 days after creation
+* golang, http and groroti metrics are exposed on `/-/metrics` path
+* export ROTI results with a csv or a PNG file
 
 | <img src="binaries/home.png"> | <img src="binaries/vote.png"> |
 | -------- | ------- |
-| <img src="binaries/roti.png"> |  |
+| <img src="binaries/roti.png"> | <img src="binaries/metrics.png"> |
 
 ## Run it!
 
