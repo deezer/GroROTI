@@ -19,7 +19,7 @@ The UI and functionalities are really basic. Here is a quick overview:
 
 ### Locally with the binary
 
-You can download the linux binary for arm64 and amd64 in the [releases page](https://github.com/deezer/GroROTI/releases). To build it yourself, see [building section](https://github.com/deezer/GroROTI?tab=readme-ov-file#building) of this page.
+You can download the linux binary for arm64 and amd64 in the [releases page](https://github.com/deezer/GroROTI/releases). To build it yourself, see [building section](https://github.com/deezer/GroROTI?tab=readme-ov-file#build-it) of this page.
 
 ### With the docker image
 
