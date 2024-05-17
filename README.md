@@ -83,7 +83,7 @@ Deploy on clever cloud
 clever deploy
 ```
 
-## Configuration
+## Configure it!
 
 You can customize some of the features of GroROTI:
 
@@ -95,7 +95,7 @@ You can customize some of the features of GroROTI:
 * **qr code size** - default is "384" (in pixels), can be overridden with *QR_CODE_SIZE* environment variable or *qr_code_size* in configuration file
 * **clean over time** - when a new ROTI is created, remove all ROTIs that are older than xxx. Default is 30 (in days), can be overridden with *CLEAN_OVER_TIME* environment variable or *clean_over_time* in configuration file
 
-## Build it
+## Build it!
 
 ### Prerequisites
 
