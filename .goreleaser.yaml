@@ -50,7 +50,7 @@ docker_manifests:
       - deezer/groroti:{{.Version}}-amd64
   - name_template: deezer/groroti:latest
     image_templates:
-      - deezer/groroti:latest-arm64
+      - deezer/groroti:latest-amd64
   - name_template: deezer/groroti:{{.Version}}
     image_templates:
       - deezer/groroti:{{.Version}}-arm64
