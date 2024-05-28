@@ -21,6 +21,7 @@ dockers:
     image_templates:
       - "deezer/groroti:{{ .Version }}"
       - "deezer/groroti:latest"
+      - "deezer/groroti:amd64"
     build_flag_templates:
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -35,6 +36,7 @@ dockers:
     image_templates:
       - "deezer/groroti:{{ .Version }}"
       - "deezer/groroti:latest"
+      - "deezer/groroti:arm64"
     build_flag_templates:
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
