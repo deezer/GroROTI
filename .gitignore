@@ -24,3 +24,6 @@ bin/
 
 # Ignore clever cloud config
 .clever.json
+
+# Ignore release-env secrets
+.release-env
