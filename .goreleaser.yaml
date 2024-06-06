@@ -1,19 +1,41 @@
 before:
   hooks:
-    - go mod tidy
     - go test
 builds:
-  # https://goreleaser.com/customization/build/
-  - binary: groroti
+  - id: linux-amd64
+    main: ./
+    binary: groroti
     goos:
       - linux
     goarch:
       - amd64
-      - arm64
+    env:
+      - CC=x86_64-linux-gnu-gcc
+      - CXX=x86_64-linux-gnu-g++
+      - PKG_CONFIG_SYSROOT_DIR=/sysroot/linux/amd64
+      - PKG_CONFIG_PATH=/sysroot/linux/amd64/usr/local/lib/pkgconfig
+    flags:
+      - -mod=readonly
     ldflags:
       - -extldflags "-static"
-      - -X main.Version={{.Version}}
-    mod_timestamp: "{{ .CommitTimestamp }}"
+      - -s -w -X main.version={{.Version}}
+  - id: linux-arm64
+    main: ./
+    binary: groroti
+    goos:
+      - linux
+    goarch:
+      - arm64
+    env:
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++
+      - PKG_CONFIG_SYSROOT_DIR=/sysroot/linux/arm64
+      - PKG_CONFIG_PATH=/sysroot/linux/amd64/usr/local/lib/pkgconfig
+    flags:
+      - -mod=readonly
+    ldflags:
+      - -extldflags "-static"
+      - -s -w -X main.version={{.Version}}
 dockers:
   - use: buildx
     goos: linux

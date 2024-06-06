@@ -1,21 +1,70 @@
-BINARY=groroti
+PACKAGE_NAME          := github.com/deezer/groroti
+BINARY_NAME           := groroti
+GOLANG_CROSS_VERSION  ?= v1.22.4
 
+SYSROOT_DIR     ?= sysroots
+SYSROOT_ARCHIVE ?= sysroots.tar.bz2
+
+.PHONY: sysroot-pack
+sysroot-pack:
+	@tar cf - $(SYSROOT_DIR) -P | pv -s $[$(du -sk $(SYSROOT_DIR) | awk '{print $1}') * 1024] | pbzip2 > $(SYSROOT_ARCHIVE)
+
+.PHONY: sysroot-unpack
+sysroot-unpack:
+	@pv $(SYSROOT_ARCHIVE) | pbzip2 -cd | tar -xf -
+
+.PHONY: snapshot
+snapshot:
+	@docker run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-v $(HOME)/.docker/config.json:/root/.docker/config.json \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		--clean --snapshot
+
+.PHONY: release-dry-run
+release-dry-run:
+	@docker run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-v $(HOME)/.docker/config.json:/root/.docker/config.json \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		--clean --skip=validate --skip=publish
+
+.PHONY: release
+release:
+	@if [ ! -f ".release-env" ]; then \
+		echo "\033[91m.release-env is required for release\033[0m";\
+		exit 1;\
+	fi
+	docker run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		--env-file .release-env \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		release --clean
+
+.PHONY: clean
 clean:
 	rm -f data/qr/*.png
 
+.PHONY: dev
 dev: clean
 	SERVER_ADDR=127.0.0.1 SERVER_PORT=3000 go run main.go
 
-snapshot:
-	goreleaser --snapshot --clean
-
+.PHONY: build
 build:
-	echo "Build the application as ./${BINARY}"
-	go build -o ${BINARY} -ldflags "-extldflags '-static' -X main.Version=$$VERSION" main.go
-
-dockerbuild: build
-	docker build -t deezer/groroti:latest --build-arg VERSION=$$VERSION .
-	docker build -t deezer/groroti:$$VERSION --build-arg VERSION=$$VERSION .
-
-dockerrun:
-	docker run -p 3000:3000 deezer/groroti:latest
+	echo "Build the application as ./${BINARY_NAME}"
+	go build -o ${BINARY_NAME} -ldflags "-extldflags '-static' -X main.Version=$$VERSION" main.go
