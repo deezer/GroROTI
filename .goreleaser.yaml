@@ -18,7 +18,7 @@ builds:
       - -mod=readonly
     ldflags:
       - -extldflags "-static"
-      - -s -w -X main.version={{.Version}}
+      - -s -w -X main.Version={{.Version}}
   - id: linux-arm64
     main: ./
     binary: groroti
@@ -35,7 +35,7 @@ builds:
       - -mod=readonly
     ldflags:
       - -extldflags "-static"
-      - -s -w -X main.version={{.Version}}
+      - -s -w -X main.Version={{.Version}}
 dockers:
   - use: buildx
     goos: linux
