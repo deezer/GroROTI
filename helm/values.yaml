@@ -46,6 +46,7 @@ serviceMonitor:
 persistentVolume:
   enabled: false
   size: 1G
+  # storageClass: rook-ceph-block
   accessModes:
     - ReadWriteOnce
 

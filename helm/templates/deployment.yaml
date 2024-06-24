@@ -50,11 +50,9 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- if .Values.persistentVolume.enabled }}
           volumeMounts:
           - mountPath: /data
             name: data
-          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -67,9 +65,11 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.persistentVolume.enabled }}
       volumes:
       - name: data
+        {{- if .Values.persistentVolume.enabled }}
         persistentVolumeClaim:
           claimName: {{ template "groroti.fullname" . }}
-      {{- end }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
