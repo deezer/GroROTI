@@ -52,6 +52,7 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
     extra_files:
       - config.toml
+      - datadir/
   - use: buildx
     goos: linux
     goarch: arm64
@@ -67,6 +68,7 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
     extra_files:
       - config.toml
+      - datadir/
 checksum:
   # https://goreleaser.com/customization/checksum/
   name_template: 'checksums.txt'
