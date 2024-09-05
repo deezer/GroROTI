@@ -27,3 +27,6 @@ bin/
 
 # Ignore release-env secrets
 .release-env
+
+# Ignore values.yaml files
+helm/values.yaml
