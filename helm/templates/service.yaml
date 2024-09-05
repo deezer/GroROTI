@@ -11,5 +11,11 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+  {{- if .Values.ingress.tls }}
+    - port: {{ .Values.service.sport }}
+      targetPort: https
+      protocol: TCP
+      name: https
+  {{- end }}
   selector:
     {{- include "groroti.selectorLabels" . | nindent 4 }}

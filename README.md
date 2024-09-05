@@ -40,6 +40,7 @@ You can deploy the helm chart in this repository with (change your values with y
 
 ```bash
 cd helm
+cp values-example.yaml values.yaml
 helm install groroti -f values.yaml .
 #or if already installed
 helm upgrade groroti -f values.yaml .

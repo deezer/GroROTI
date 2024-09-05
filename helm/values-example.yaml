@@ -4,7 +4,7 @@ image:
   repository: deezer/groroti
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "latest"
+  tag: "1.0.4"
 
 serviceAccount:
   create: true
@@ -15,16 +15,20 @@ podSecurityContext:
   fsGroup: 2000
 
 securityContext:
+  allowPrivilegeEscalation: false
   capabilities:
     drop:
     - ALL
   # readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000
+  # seccompProfile: 
+  #  type: "RuntimeDefault"
 
 service:
   type: ClusterIP
   port: 80
+  sport: 443
 
 frontendURL: https://groroti.domain.tld
 
@@ -32,12 +36,17 @@ ingress:
   enabled: true
   className: ""
   annotations: {}
+  # annotations:
+  #  cert-manager.io/cluster-issuer: letsencrypt-dns
   hosts:
     - host: groroti.domain.tld
       paths:
         - path: /
-          pathType: ImplementationSpecific
-  tls: []
+          pathType: Prefix
+  tls:
+    - secretName: groroti-tls
+      hosts:
+        - groroti.domain.tld
 
 # you need to have the serviceMonitor CRDs to allow this
 serviceMonitor:
