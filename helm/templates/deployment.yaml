@@ -6,6 +6,8 @@ metadata:
     {{- include "groroti.labels" . | nindent 4 }}s
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "groroti.selectorLabels" . | nindent 6 }}
@@ -23,8 +25,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "groroti.serviceAccountName" . }}
-      strategy:
-        type: Recreate
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
