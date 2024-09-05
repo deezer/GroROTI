@@ -41,9 +41,9 @@ dockers:
     goos: linux
     goarch: amd64
     image_templates:
-      - "zwindler/groroti:{{ .Version }}"
-      - "zwindler/groroti:latest"
-      - "zwindler/groroti:amd64"
+      - "deezer/groroti:{{ .Version }}"
+      - "deezer/groroti:latest"
+      - "deezer/groroti:amd64"
     build_flag_templates:
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -57,9 +57,9 @@ dockers:
     goos: linux
     goarch: arm64
     image_templates:
-      - "zwindler/groroti:{{ .Version }}"
-      - "zwindler/groroti:latest"
-      - "zwindler/groroti:arm64"
+      - "deezer/groroti:{{ .Version }}"
+      - "deezer/groroti:latest"
+      - "deezer/groroti:arm64"
     build_flag_templates:
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
