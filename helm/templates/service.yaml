@@ -4,6 +4,13 @@ metadata:
   name: {{ include "groroti.fullname" . }}
   labels:
     {{- include "groroti.labels" . | nindent 4 }}
+  {{- if not .Values.serviceMonitor.create }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /-/metrics
+    prometheus.io/port: "{{ .Values.service.port }}"
+    prometheus.io/scheme: "http"
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
