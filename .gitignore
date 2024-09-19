@@ -27,3 +27,6 @@ bin/
 
 # Ignore release-env secrets
 .release-env
+
+# try to ignore .goreleaser
+.goreleaser
