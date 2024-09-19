@@ -14,8 +14,10 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
+var TP *sdktrace.TracerProvider
+
 // SetupOTelSDK initializes OpenTelemetry with the OTLP exporter for tracing.
-func SetupOTelSDK(ctx context.Context, config config.Config) (func(context.Context) error, *sdktrace.TracerProvider, error) {
+func SetupOTelSDK(ctx context.Context, config config.Config) (func(context.Context) error, error) {
 	log.Info().Msgf("enable OpenTelemetry: %t", config.EnableTracing)
 	if config.EnableTracing {
 		// Create a new OTLP HTTP exporter
@@ -27,7 +29,7 @@ func SetupOTelSDK(ctx context.Context, config config.Config) (func(context.Conte
 
 		exporter, err := otlptrace.New(ctx, client)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to create OTLP trace exporter: %w", err)
+			return nil, fmt.Errorf("failed to create OTLP trace exporter: %w", err)
 		}
 
 		res, err := resource.New(ctx,
@@ -36,29 +38,29 @@ func SetupOTelSDK(ctx context.Context, config config.Config) (func(context.Conte
 			),
 		)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to create resource: %w", err)
+			return nil, fmt.Errorf("failed to create resource: %w", err)
 		}
 
 		// Set up the TracerProvider with the exporter and resource
-		tp := sdktrace.NewTracerProvider(
+		TP = sdktrace.NewTracerProvider(
 			sdktrace.WithBatcher(exporter),
 			sdktrace.WithResource(res),
 		)
 
 		// Set the global TracerProvider
-		otel.SetTracerProvider(tp)
+		otel.SetTracerProvider(TP)
 
 		// Function to shutdown the tracer provider
 		shutdown := func(ctx context.Context) error {
 			// Ensure all spans are exported before shutting down
-			err := tp.Shutdown(ctx)
+			err := TP.Shutdown(ctx)
 			if err != nil {
 				log.Printf("failed to shutdown tracer provider: %v", err)
 			}
 			return err
 		}
 
-		return shutdown, tp, nil
+		return shutdown, nil
 	}
-	return nil, nil, nil
+	return nil, nil
 }

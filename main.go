@@ -19,6 +19,7 @@ import (
 
 var (
 	Version string
+	otelShutdown func(context.Context) error
 )
 
 func main() {
@@ -39,7 +40,7 @@ func run() (err error) {
 	defer stop()
 
 	// Set up OpenTelemetry.
-	otelShutdown, tp, err := middlewares.SetupOTelSDK(ctx, configRepository)
+	otelShutdown, err = middlewares.SetupOTelSDK(ctx, configRepository)
 	if err != nil {
 		return
 	}
@@ -48,6 +49,7 @@ func run() (err error) {
 		err = errors.Join(err, otelShutdown(context.Background()))
 	}()
 
+	services.Version = Version
 	log.Info().Msgf("GroROTI version v%s", Version)
 	sqliteDatabase := model.InitDatabase()
 	defer sqliteDatabase.Close()
@@ -58,12 +60,8 @@ func run() (err error) {
 		return fmt.Errorf("couldn't load templates : %s", err.Error())
 	}
 
-	services.Version = Version
-	services.Register(tp)
-
-
+	services.Register()
 	addr := configRepository.BuildServerAddr()
-
 	log.Info().Msgf("Start listening on %s", addr)
 	http.ListenAndServe(addr, nil)
 

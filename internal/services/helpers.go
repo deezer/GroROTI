@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/deezer/groroti/internal/model"
+	"go.opentelemetry.io/otel/trace"
 	"github.com/rs/zerolog/log"
 	qrcode "github.com/skip2/go-qrcode"
 )
@@ -19,6 +21,12 @@ var (
 // getIDFromURL() takes the id in the URL and checks if it's a valid int comprised
 // between 10000 and 99999
 func getIDFromURL(r *http.Request, legacy_routing bool) (rotiID int, err error) {
+	var span trace.Span
+	if currentConfig.EnableTracing {
+		_, span = tracer.Start(r.Context(), "getIDFromURL")
+	defer span.End()
+	}
+
 	var urlRotiId string
 	if legacy_routing {
 		urlRotiId = r.URL.Query().Get("r")
@@ -39,7 +47,13 @@ func getIDFromURL(r *http.Request, legacy_routing bool) (rotiID int, err error) 
 	return
 }
 
-func setVotedCookie(w http.ResponseWriter, rotiID int) {
+func setVotedCookie(w http.ResponseWriter, rotiID int, ctx context.Context) {
+	var span trace.Span
+	if currentConfig.EnableTracing {
+		_, span = tracer.Start(ctx, "setVotedCookie")
+		defer span.End()
+	}
+
 	cookie := http.Cookie{
 		Name:     "voted_roti_" + strconv.Itoa(rotiID),
 		Value:    "true",
@@ -51,6 +65,12 @@ func setVotedCookie(w http.ResponseWriter, rotiID int) {
 }
 
 func hasVotedForROTI(r *http.Request, rotiID int) (bool, error) {
+	var span trace.Span
+	if currentConfig.EnableTracing {
+		_, span = tracer.Start(r.Context(), "hasVotedForROTI")
+		defer span.End()
+	}
+
 	cookieName := "voted_roti_" + strconv.Itoa(rotiID)
 	_, err := r.Cookie(cookieName)
 	if err == nil {
@@ -61,7 +81,13 @@ func hasVotedForROTI(r *http.Request, rotiID int) (bool, error) {
 	return false, err
 }
 
-func genQRCode(url string, strid string) (err error) {
+func genQRCode(url string, strid string, ctx context.Context) (err error) {
+	var span trace.Span
+	if currentConfig.EnableTracing {
+		_, span = tracer.Start(ctx, "genQRCode")
+		defer span.End()
+	}
+
 	// check directory tree for data/qr
 	qrDir := "data/qr"
 	if _, err := os.Stat(qrDir); errors.Is(err, os.ErrNotExist) {
