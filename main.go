@@ -37,7 +37,7 @@ func run() (err error) {
 	defer stop()
 
 	// Set up OpenTelemetry.
-	otelShutdown, err := middlewares.SetupOTelSDK(ctx, configRepository.EnableTracing)
+	otelShutdown, err := middlewares.SetupOTelSDK(ctx, configRepository)
 	if err != nil {
 		return
 	}
