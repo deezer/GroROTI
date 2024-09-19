@@ -31,6 +31,9 @@ service:
   sport: 443
 
 frontendURL: https://groroti.domain.tld
+tracing:
+  enable: false
+  otlp: ""
 
 ingress:
   enabled: true
