@@ -29,4 +29,4 @@ bin/
 .release-env
 
 # try to ignore .goreleaser
-.goreleaser
+.goreleaser.yaml
