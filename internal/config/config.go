@@ -16,6 +16,8 @@ type Config struct {
 	VoteStep      float64 `toml:"vote_step"`
 	QrCodeSize    int     `toml:"qr_code_size"`
 	CleanOverTime int     `toml:"clean_over_time"`
+	EnableTracing bool    `toml:"enable_tracing"`
+	OTLPEndpoint  string  `toml:"otlp_endpoint"`
 }
 
 func NewConfig(config Config) *Config {

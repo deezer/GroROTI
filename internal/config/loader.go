@@ -19,6 +19,8 @@ const (
 	voteStepEnvVar    = "VOTE_STEP"
 	qrCodeSizeEnvVar  = "QR_CODE_SIZE"
 	cleanOverTime     = "CLEAN_OVER_TIME"
+	enableTracing     = "ENABLE_TRACING"
+	OTLPEndpoint      = "OTLP_ENDPOINT"
 )
 
 func parse(path string) (Config, error) {
@@ -76,6 +78,10 @@ func (c *Config) SetDefaults() {
 	if c.CleanOverTime == 0 {
 		c.CleanOverTime = 30
 	}
+
+	if c.OTLPEndpoint == "" {
+		c.OTLPEndpoint = "localhost:4318"
+	}
 }
 
 func (c *Config) SetConfigFromEnv() (err error) {
@@ -117,6 +123,16 @@ func (c *Config) SetConfigFromEnv() (err error) {
 			return err
 		}
 		c.CleanOverTime = cot
+	}
+
+	enableTracingFromEnv := os.Getenv(enableTracing)
+	if enableTracingFromEnv == "true" {
+		c.EnableTracing = true
+	}
+
+	OTLPEndpointFromEnv := os.Getenv(OTLPEndpoint)
+	if OTLPEndpointFromEnv != "" {
+		c.OTLPEndpoint = OTLPEndpointFromEnv
 	}
 
 	return nil
