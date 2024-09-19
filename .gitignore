@@ -6,6 +6,9 @@
 *.dylib
 groroti
 
+# try to ignore .goreleaser
+.goreleaser.yaml
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -27,6 +30,3 @@ bin/
 
 # Ignore release-env secrets
 .release-env
-
-# try to ignore .goreleaser
-.goreleaser.yaml
