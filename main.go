@@ -26,12 +26,18 @@ func main() {
 }
 
 func run() (err error) {
+	// Get config first
+	configRepository, err := services.GetConfig()
+	if err != nil {
+		return err
+	}
+
 	// Handle SIGINT (CTRL+C) gracefully.
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
 	// Set up OpenTelemetry.
-	otelShutdown, err := middlewares.SetupOTelSDK(ctx)
+	otelShutdown, err := middlewares.SetupOTelSDK(ctx, configRepository.EnableTracing)
 	if err != nil {
 		return
 	}
@@ -53,10 +59,7 @@ func run() (err error) {
 	services.Version = Version
 	services.Register()
 
-	configRepository, err := services.GetConfig()
-	if err != nil {
-		return err
-	}
+
 	addr := configRepository.BuildServerAddr()
 
 	log.Info().Msgf("Start listening on %s", addr)
