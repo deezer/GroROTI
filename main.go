@@ -17,7 +17,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var Version string
+var (
+	Version string
+)
 
 func main() {
 	if err := run(); err != nil {
@@ -37,7 +39,7 @@ func run() (err error) {
 	defer stop()
 
 	// Set up OpenTelemetry.
-	otelShutdown, err := middlewares.SetupOTelSDK(ctx, configRepository)
+	otelShutdown, tp, err := middlewares.SetupOTelSDK(ctx, configRepository)
 	if err != nil {
 		return
 	}
@@ -57,7 +59,7 @@ func run() (err error) {
 	}
 
 	services.Version = Version
-	services.Register()
+	services.Register(tp)
 
 
 	addr := configRepository.BuildServerAddr()

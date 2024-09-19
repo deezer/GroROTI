@@ -13,6 +13,8 @@ import (
 	"github.com/deezer/groroti/internal/model"
 	"github.com/deezer/groroti/internal/staticEmbed"
 	"github.com/rs/zerolog/log"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -20,6 +22,7 @@ var (
 	ErrTemplateExecute   = errors.New("error while execution of template file")
 	ErrParsingToInt      = errors.New("error while parsing to int")
 	Version              string
+	tracer               trace.Tracer
 )
 
 type existingROTI struct {
@@ -35,11 +38,14 @@ type existingROTI struct {
 	Version      string
 }
 
-func Register() *http.ServeMux {
+func Register(tp *sdktrace.TracerProvider) *http.ServeMux {
 	router := http.DefaultServeMux
 
 	// launch the periodic process that collects the metrics
 	recordMetrics()
+
+	// Set up OpenTelemetry tracer
+	tracer = tp.Tracer("github.com/deezer/groroti/internal/services")
 
 	// Prometheus + liveness/readiness
 	router.Handle("GET /-/liveness", NewHealthHandler())
@@ -72,6 +78,9 @@ func Register() *http.ServeMux {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "home")
+	defer span.End()
+
 	templateFilePath := "templates/index.html"
 	t, ok := staticEmbed.Templates[templateFilePath]
 	if !ok {
@@ -94,6 +103,9 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func displayROTIHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "display ROTI")
+	defer span.End()
+
 	var currentROTI model.ROTIEntity
 
 	rotiID, err := getIDFromURL(r, false)
@@ -155,6 +167,8 @@ func displayROTIHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func displayROTIHandlerLegacy(w http.ResponseWriter, r *http.Request) {
+
+
 	rotiID, err := getIDFromURL(r, true)
 	if err != nil {
 		logErrorAndGoBackHome(err, w, r)
@@ -164,6 +178,9 @@ func displayROTIHandlerLegacy(w http.ResponseWriter, r *http.Request) {
 }
 
 func displayVoteHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "display vote")
+	defer span.End()
+
 	var currentROTI model.ROTIEntity
 
 	rotiID, err := getIDFromURL(r, false)
@@ -207,6 +224,9 @@ func displayVoteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func downloadPNGHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "download PNG")
+	defer span.End()
+
 	var currentROTI model.ROTIEntity
 
 	rotiID, err := getIDFromURL(r, false)
@@ -244,6 +264,9 @@ func downloadPNGHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func downloadCSVHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "download CSV")
+	defer span.End()
+
 	var currentROTI model.ROTIEntity
 
 	rotiID, err := getIDFromURL(r, false)
@@ -283,6 +306,9 @@ func downloadCSVHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postROTIHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "create ROTI")
+	defer span.End()
+
 	var rotiname string
 	var hide, feedback bool
 
@@ -306,6 +332,9 @@ func postROTIHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postVoteHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "create vote")
+	defer span.End()
+
 	rotiID, err := getIDFromURL(r, false)
 	if err != nil {
 		logErrorAndGoBackHome(err, w, r)
