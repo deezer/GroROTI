@@ -32,7 +32,7 @@ service:
 
 frontendURL: https://groroti.domain.tld
 tracing:
-  enable: false
+  enable: "false"
   otlp: ""
 
 ingress:
