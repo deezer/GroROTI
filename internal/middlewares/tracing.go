@@ -2,71 +2,60 @@ package middlewares
 
 import (
 	"context"
-	"errors"
-	"time"
+	"fmt"
+	"log"
+
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
-	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
 // setupOTelSDK bootstraps the OpenTelemetry pipeline.
-// If it does not return an error, make sure to call shutdown for proper cleanup.
-func SetupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, err error) {
-	var shutdownFuncs []func(context.Context) error
+// SetupOTelSDK initializes OpenTelemetry with the OTLP exporter for tracing.
+func SetupOTelSDK(ctx context.Context) (func(context.Context) error, error) {
+	// Create a new OTLP HTTP exporter
+	client := otlptracehttp.NewClient(
+		otlptracehttp.WithEndpoint("localhost:4318"), // Replace with your OTLP collector endpoint
+		otlptracehttp.WithInsecure(),                // Use WithInsecure if not using TLS
+	)
 
-	// shutdown calls cleanup functions registered via shutdownFuncs.
-	// The errors from the calls are joined.
-	// Each registered cleanup will be invoked once.
-	shutdown = func(ctx context.Context) error {
-		var err error
-		for _, fn := range shutdownFuncs {
-			err = errors.Join(err, fn(ctx))
+	exporter, err := otlptrace.New(ctx, client)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create OTLP trace exporter: %w", err)
+	}
+
+	// Create a resource to describe this service
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String("GoWebServer"), // Customize with your service name
+		),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create resource: %w", err)
+	}
+
+	// Set up the tracer provider with the exporter and resource
+	tp := trace.NewTracerProvider(
+		trace.WithBatcher(exporter), // Use the exporter to export spans
+		trace.WithResource(res),     // Attach resource information to the traces
+	)
+
+	// Set the global tracer provider
+	otel.SetTracerProvider(tp)
+
+	// Function to shutdown the tracer provider
+	shutdown := func(ctx context.Context) error {
+		// Ensure all spans are exported before shutting down
+		err := tp.Shutdown(ctx)
+		if err != nil {
+			log.Printf("failed to shutdown tracer provider: %v", err)
 		}
-		shutdownFuncs = nil
 		return err
 	}
 
-	// handleErr calls shutdown for cleanup and makes sure that all errors are returned.
-	handleErr := func(inErr error) {
-		err = errors.Join(inErr, shutdown(ctx))
-	}
-
-	// Set up propagator.
-	prop := newPropagator()
-	otel.SetTextMapPropagator(prop)
-
-	// Set up trace provider.
-	tracerProvider, err := newTraceProvider()
-	if err != nil {
-		handleErr(err)
-		return
-	}
-	shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
-	otel.SetTracerProvider(tracerProvider)
-
-	return
-}
-
-func newPropagator() propagation.TextMapPropagator {
-	return propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-	)
-}
-
-func newTraceProvider() (*trace.TracerProvider, error) {
-	traceExporter, err := stdouttrace.New(
-		stdouttrace.WithPrettyPrint())
-	if err != nil {
-		return nil, err
-	}
-
-	traceProvider := trace.NewTracerProvider(
-		trace.WithBatcher(traceExporter,
-			// Default is 5s. Set to 1s for demonstrative purposes.
-			trace.WithBatchTimeout(time.Second)),
-	)
-	return traceProvider, nil
+	return shutdown, nil
 }
