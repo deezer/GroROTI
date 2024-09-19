@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/deezer/groroti/internal/middlewares"
 	"github.com/deezer/groroti/internal/model"
 	"github.com/deezer/groroti/internal/services"
 	"github.com/deezer/groroti/internal/staticEmbed"
@@ -30,7 +31,7 @@ func run() (err error) {
 	defer stop()
 
 	// Set up OpenTelemetry.
-	otelShutdown, err := services.SetupOTelSDK(ctx)
+	otelShutdown, err := middlewares.SetupOTelSDK(ctx)
 	if err != nil {
 		return
 	}
@@ -46,7 +47,7 @@ func run() (err error) {
 	// load embedded gotemplates in embed.Templates
 	err = staticEmbed.LoadTemplates()
 	if err != nil {
-		return fmt.Errorf("Couldn't load templates : %s", err.Error())
+		return fmt.Errorf("couldn't load templates : %s", err.Error())
 	}
 
 	services.Version = Version
@@ -73,7 +74,6 @@ func run() (err error) {
 	go func() {
 		srvErr <- srv.ListenAndServe()
 	}()
-
 
 	// Wait for interruption.
 	select {
