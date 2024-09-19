@@ -36,7 +36,7 @@ spec:
           - name: FRONTEND_URL
             value: {{ .Values.frontendURL }}
           - name: ENABLE_TRACING
-            value: {{ .Values.tracing.enable }}
+            value: {{ .Values.tracing.enable | quote }}
           - name: OTLP_ENDPOINT
             value: {{ .Values.tracing.otlp }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
