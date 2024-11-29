@@ -2,7 +2,9 @@ package middlewares
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"strings"
 
 	"github.com/deezer/groroti/internal/config"
 	"github.com/rs/zerolog/log"
@@ -20,12 +22,21 @@ var TP *sdktrace.TracerProvider
 func SetupOTelSDK(ctx context.Context, config config.Config) (func(context.Context) error, error) {
 	log.Info().Msgf("enable OpenTelemetry: %t", config.EnableTracing)
 	if config.EnableTracing {
-		// Create a new OTLP HTTP exporter
-		log.Info().Msgf("sending OpenTelemetry traces to: %s", config.OTLPEndpoint)
-		client := otlptracehttp.NewClient(
-			otlptracehttp.WithEndpoint(config.OTLPEndpoint), // Replace with your OTLP collector endpoint
-			otlptracehttp.WithInsecure(),                // Use WithInsecure if not using TLS
-		)
+		// Determine if the endpoint uses HTTPS and configure appropriately
+		var clientOptions []otlptracehttp.Option
+		if strings.HasPrefix(config.OTLPEndpoint, "https://") {
+			clientOptions = append(clientOptions,
+				otlptracehttp.WithEndpoint(strings.TrimPrefix(config.OTLPEndpoint, "https://")),
+				otlptracehttp.WithTLSClientConfig(&tls.Config{InsecureSkipVerify: false}),
+			)
+		} else {
+			clientOptions = append(clientOptions,
+				otlptracehttp.WithEndpoint(strings.TrimPrefix(config.OTLPEndpoint, "http://")),
+				otlptracehttp.WithInsecure(),
+			)
+		}
+
+		client := otlptracehttp.NewClient(clientOptions...)
 
 		exporter, err := otlptrace.New(ctx, client)
 		if err != nil {
