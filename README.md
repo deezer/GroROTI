@@ -93,7 +93,7 @@ clever deploy
 
 ## Configure it!
 
-You can customize some of the features of GroROTI:
+You can customize some of the features of GroROTI. All those fields are optional:
 
 * **configuration file path** - default is "config.toml", can be overridden with *GROROTI_CONFIG* environment variable
 * **server listening address** - default is "0.0.0.0", can be overridden with *SERVER_ADDR* environment variable or *server_addr* in configuration file
@@ -104,6 +104,8 @@ You can customize some of the features of GroROTI:
 * **clean over time** - when a new ROTI is created, remove all ROTIs that are older than xxx. Default is 30 (in days), can be overridden with *CLEAN_OVER_TIME* environment variable or *clean_over_time* in configuration file
 * **enable tracing** - default is "false", can be overridden with *ENABLE_TRACING* environment variable or *enable_tracing* in configuration file
 * **otlp endpoint** - default is "localhost:4318", can be overridden with *OTLP_ENDPOINT* environment variable or *otlp_endpoint* in configuration file
+* **otlp HTTP basic auth username** - default is empty, which means no HTTP basic auth. Can be overridden with *OTLP_BASIC_USERNAME* environment variable or *otlp_basic_username* in configuration file
+* **otlp HTTP basic auth password** - default is empty, which means no HTTP basic auth. Can be overridden with *OTLP_BASIC_PASSWORD* environment variable or *otlp_basic_password* in configuration file
 
 ## Build it!
 

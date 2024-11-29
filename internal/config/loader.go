@@ -21,6 +21,8 @@ const (
 	cleanOverTime     = "CLEAN_OVER_TIME"
 	enableTracing     = "ENABLE_TRACING"
 	OTLPEndpoint      = "OTLP_ENDPOINT"
+	OTLPBasicUsername = "OTLP_BASIC_USERNAME"
+	OTLPBasicPassword = "OTLP_BASIC_PASSWORD"
 )
 
 func parse(path string) (Config, error) {
@@ -133,6 +135,16 @@ func (c *Config) SetConfigFromEnv() (err error) {
 	OTLPEndpointFromEnv := os.Getenv(OTLPEndpoint)
 	if OTLPEndpointFromEnv != "" {
 		c.OTLPEndpoint = OTLPEndpointFromEnv
+	}
+
+	OTLPBasicUsernameFromEnv := os.Getenv(OTLPBasicUsername)
+	if OTLPBasicUsernameFromEnv != "" {
+		c.OTLPBasicUsername = OTLPBasicUsernameFromEnv
+	}
+
+	OTLPBasicPasswordFromEnv := os.Getenv(OTLPBasicPassword)
+	if OTLPBasicPasswordFromEnv != "" {
+		c.OTLPBasicPassword = OTLPBasicPasswordFromEnv
 	}
 
 	return nil

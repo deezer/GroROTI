@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"strings"
 
@@ -18,12 +19,27 @@ import (
 
 var TP *sdktrace.TracerProvider
 
+// Helper function to generate Basic Auth header
+func generateBasicAuthHeader(username, password string) string {
+	auth := username + ":" + password
+	return "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
 // SetupOTelSDK initializes OpenTelemetry with the OTLP exporter for tracing.
 func SetupOTelSDK(ctx context.Context, config config.Config) (func(context.Context) error, error) {
 	log.Info().Msgf("enable OpenTelemetry: %t", config.EnableTracing)
 	if config.EnableTracing {
 		// Determine if the endpoint uses HTTPS and configure appropriately
 		var clientOptions []otlptracehttp.Option
+
+		// Set Basic Authentication headers if credentials are provided
+		if config.OTLPBasicUsername != "" && config.OTLPBasicPassword != "" {
+			basicAuthHeader := generateBasicAuthHeader(config.OTLPBasicUsername, config.OTLPBasicPassword)
+			clientOptions = append(clientOptions, otlptracehttp.WithHeaders(map[string]string{
+				"Authorization": basicAuthHeader,
+			}))
+		}
+
 		if strings.HasPrefix(config.OTLPEndpoint, "https://") {
 			clientOptions = append(clientOptions,
 				otlptracehttp.WithEndpoint(strings.TrimPrefix(config.OTLPEndpoint, "https://")),
