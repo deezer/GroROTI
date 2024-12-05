@@ -113,6 +113,15 @@ You can customize some of the features of GroROTI. All those fields are optional
 
 This software requires Go 1.22+
 
+To use gorelease and/or Makefile you need `make` and `docker` (Makefile doesn't work well with Podman)
+
+You may also need to run the following commands
+
+```bash
+mkdir datadir/ sysroot/
+touch config.toml
+```
+
 ### Run dev version
 
 The `Makefile` has an alias to help you run the server in dev mode with a simple `make dev` command
@@ -164,6 +173,8 @@ docker build -t localgroroti .
 docker run -p 3000:3000 localgroroti
 ```
 
-## Additionnal licences
+Note: you can't use Goreleaser [without the "Pro" version when using Podman](https://goreleaser.com/customization/docker_manifest/#using-podman).
 
-fonts Luciole under Creative Commons Attribution 4.0 International Public License, © Laurent Bourcellier & Jonathan Perez. See [ReadMe.txt](internal/staticEmbed/static/ReadMe.txt) .
+## Additionnal licences (fonts)
+
+font **Luciole** under Creative Commons Attribution 4.0 International Public License, © Laurent Bourcellier & Jonathan Perez. See [ReadMe.txt](internal/staticEmbed/static/ReadMe.txt) .
