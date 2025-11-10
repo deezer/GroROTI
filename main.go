@@ -46,7 +46,9 @@ func run() (err error) {
 	}
 	// Handle shutdown properly so nothing leaks.
 	defer func() {
-		err = errors.Join(err, otelShutdown(context.Background()))
+		if otelShutdown != nil {
+			err = errors.Join(err, otelShutdown(context.Background()))
+		}
 	}()
 
 	services.Version = Version
