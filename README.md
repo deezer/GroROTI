@@ -111,15 +111,24 @@ You can customize some of the features of GroROTI. All those fields are optional
 
 ### Prerequisites
 
-This software requires Go 1.22+
+This software requires Go 1.25+
 
-To use gorelease and/or Makefile you need `make` and `docker` (Makefile doesn't work well with Podman)
+To use gorelease in the Makefile to crosscompile to amd64 AND arm64, you need `make` and `docker` (Makefile doesn't work well with Podman)
 
 You may also need to run the following commands
 
 ```bash
 mkdir datadir/ sysroot/
 touch config.toml
+```
+
+If you plan to use goreleaser and the cross compiling system, you'll need:
+- `pv`
+- `pbzip2`
+- sysroots folders (you can find an [oudated example here](https://github.com/goreleaser/goreleaser-cross-example-sysroot/tree/master), and the [documentation explains how to do it properly here](https://github.com/goreleaser/goreleaser-cross-example-sysroot/tree/master) using "[the script](https://github.com/goreleaser/goreleaser-cross/blob/master/scripts/sysroot-rsync.sh)")
+
+```bash
+git submodule add https://github.com/goreleaser/goreleaser-cross-example-sysroot.git sysroots
 ```
 
 ### Run dev version
@@ -136,7 +145,7 @@ All building operations for the project (both binaries and docker images) are do
 
 ### goreleaser
 
-You can build it on any commit using the `--snapshot` goreleaser option:
+Note: don't forget the prerequisites (see above). You can build it on any commit using the `--snapshot` goreleaser option:
 
 ```bash
 make snapshot
