@@ -24,7 +24,7 @@ var (
 
 func main() {
 	if err := run(); err != nil {
-		log.Fatal().Msgf(err.Error())
+		log.Fatal().Err(err).Msg("")
 	}
 }
 

@@ -23,13 +23,13 @@ You can download the linux binary for arm64 and amd64 in the [releases page](htt
 
 ### With the docker image
 
-Public docker images are available on [hub.docker.com](https://hub.docker.com/u/deezer).
+Public docker images are available on [GitHub Container Registry](https://github.com/deezer/GroROTI/pkgs/container/groroti).
 
 You can pull/run the latest version by running:
 
 ```bash
-docker pull deezer/groroti:latest
-docker run -p 3000:3000 -e FRONTEND_URL=https://groroti.mydomain.tld deezer/groroti
+docker pull ghcr.io/deezer/groroti:latest
+docker run -p 3000:3000 -e FRONTEND_URL=https://groroti.mydomain.tld ghcr.io/deezer/groroti:latest
 ```
 
 Aside from frontend URL, to customize other parameters, see [Configuration section](https://github.com/deezer/GroROTI?tab=readme-ov-file#Configuration) on this page.
@@ -168,9 +168,9 @@ Deezer staff can push a new release by tagging the git repository to create a ne
 ```bash
 git tag -a 1.0.0 -m "1.0.0 release"
 git push origin 1.0.0
-export GITHUB_TOKEN="ghx_xxxxxxxxxxxxxxxxxx" #or use ~/.config/goreleaser/github_token file
-goreleaser release
 ```
+
+This will trigger a github action that will test the code, build the binary, build the docker image and push it on ghcr.io.
 
 ### manually
 

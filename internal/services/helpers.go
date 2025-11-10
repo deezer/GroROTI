@@ -105,6 +105,6 @@ func genQRCode(url string, strid string, ctx context.Context) (err error) {
 }
 
 func logErrorAndGoBackHome(err error, w http.ResponseWriter, r *http.Request) {
-	log.Error().Msgf(err.Error())
+	log.Error().Err(err).Msg("")
 	http.Redirect(w, r, "/", http.StatusNotAcceptable)
 }

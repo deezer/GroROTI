@@ -60,7 +60,7 @@ func GetROTI(rotiid ROTIID) (roti ROTIEntity, err error) {
 
 	row, err := sqliteDatabase.Query("SELECT description,hide,feedback FROM roti WHERE rotiid =" + strconv.Itoa(int(rotiid)))
 	if err != nil {
-		log.Fatal().Msgf(err.Error())
+		log.Fatal().Err(err).Msg("")
 	}
 	defer row.Close()
 
@@ -79,11 +79,11 @@ func insertROTI(db *sql.DB, roti ROTIEntity) {
 	statement, err := db.Prepare(insertROTISQL)
 
 	if err != nil {
-		log.Fatal().Msgf(err.Error())
+		log.Fatal().Err(err).Msg("")
 	}
 	_, err = statement.Exec(id, roti.description, roti.hide, roti.feedback)
 	if err != nil {
-		log.Fatal().Msgf(err.Error())
+		log.Fatal().Err(err).Msg("")
 	}
 }
 
@@ -176,7 +176,7 @@ func cleanOldROTIs(db *sql.DB, clean int) {
 func ListROTIs() (rotis []ShortROTIInfo) {
 	row, err := sqliteDatabase.Query("SELECT rotiid,description FROM roti WHERE hide = FALSE ORDER BY id DESC LIMIT 10;")
 	if err != nil {
-		log.Fatal().Msgf(err.Error())
+		log.Fatal().Err(err).Msg("")
 	}
 	defer row.Close()
 	for row.Next() {
@@ -184,7 +184,7 @@ func ListROTIs() (rotis []ShortROTIInfo) {
 		var description string
 		err := row.Scan(&rotiid, &description)
 		if err != nil {
-			log.Fatal().Msgf(err.Error())
+			log.Fatal().Err(err).Msg("")
 		}
 		shortInfo := ShortROTIInfo{ID: ROTIID(rotiid), Desc: description}
 		rotis = append(rotis, shortInfo)
@@ -196,7 +196,7 @@ func CountROTIs() int {
 	var count int
 	err := sqliteDatabase.QueryRow("SELECT COUNT(*) FROM roti").Scan(&count)
 	if err != nil {
-		log.Fatal().Msgf(err.Error())
+		log.Fatal().Err(err).Msg("")
 	}
 	return count
 }
@@ -206,7 +206,7 @@ func GetMaxROTIID() int {
 	var maxID sql.NullInt64
 	err := sqliteDatabase.QueryRow("SELECT MAX(id) FROM roti").Scan(&maxID)
 	if err != nil {
-		log.Fatal().Msgf(err.Error())
+		log.Fatal().Err(err).Msg("")
 	}
 
 	if maxID.Valid {

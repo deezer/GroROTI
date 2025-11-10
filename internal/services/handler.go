@@ -388,19 +388,19 @@ func postVoteHandler(w http.ResponseWriter, r *http.Request) {
 	// check vote validity
 	vote, err := model.CheckVote(r.FormValue("vote"))
 	if err != nil {
-		log.Error().Msgf(model.ErrInvalidVote.Error())
+		log.Error().Err(model.ErrInvalidVote).Msg("")
 		http.Redirect(w, r, "/roti/"+strconv.Itoa(rotiID), http.StatusNotAcceptable)
 		return
 	}
 
 	if hasVoted, _ := hasVotedForROTI(r, rotiID); hasVoted {
-		log.Warn().Msgf("User has already voted for ROTI " + strconv.Itoa(rotiID))
+		log.Warn().Msg("User has already voted for ROTI " + strconv.Itoa(rotiID))
 		http.Redirect(w, r, "/roti/"+strconv.Itoa(rotiID), http.StatusFound)
 		return
 	}
 
 	if err := currentROTI.AddVoteToROTI(vote, feedback); err != nil {
-		log.Warn().Msgf(err.Error())
+		log.Warn().Err(err).Msg("")
 		http.Redirect(w, r, "/roti/"+strconv.Itoa(rotiID), http.StatusFound)
 		return
 	}
