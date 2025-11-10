@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"strconv"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -58,7 +57,7 @@ func GetROTI(rotiid ROTIID) (roti ROTIEntity, err error) {
 	var description string
 	var hide, feedback bool
 
-	row, err := sqliteDatabase.Query("SELECT description,hide,feedback FROM roti WHERE rotiid =" + strconv.Itoa(int(rotiid)))
+	row, err := sqliteDatabase.Query("SELECT description,hide,feedback FROM roti WHERE rotiid = ?", int(rotiid))
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
@@ -243,7 +242,7 @@ func (currentROTI *ROTIEntity) AddVoteToROTI(value float64, feedback string) (er
 }
 
 func (currentROTI *ROTIEntity) CountVotes() int {
-	row, err := sqliteDatabase.Query("SELECT COUNT(*) FROM vote WHERE roti =" + strconv.Itoa(int(currentROTI.id)))
+	row, err := sqliteDatabase.Query("SELECT COUNT(*) FROM vote WHERE roti = ?", int(currentROTI.id))
 	if err != nil {
 		log.Fatal().Msgf("couldn't connect to database")
 	}
@@ -260,7 +259,7 @@ func (currentROTI *ROTIEntity) CountVotes() int {
 func (currentROTI *ROTIEntity) GetMinVote() float64 {
 	var min sql.NullFloat64
 
-	row, err := sqliteDatabase.Query("SELECT MIN(value) FROM vote WHERE roti =" + strconv.Itoa(int(currentROTI.id)))
+	row, err := sqliteDatabase.Query("SELECT MIN(value) FROM vote WHERE roti = ?", int(currentROTI.id))
 	if err != nil {
 		log.Fatal().Msgf("couldn't connect to database")
 	}
@@ -277,7 +276,7 @@ func (currentROTI *ROTIEntity) GetMinVote() float64 {
 func (currentROTI *ROTIEntity) GetMaxVote() float64 {
 	var max sql.NullFloat64
 
-	row, err := sqliteDatabase.Query("SELECT MAX(value) FROM vote WHERE roti =" + strconv.Itoa(int(currentROTI.id)))
+	row, err := sqliteDatabase.Query("SELECT MAX(value) FROM vote WHERE roti = ?", int(currentROTI.id))
 	if err != nil {
 		log.Fatal().Msgf("couldn't connect to database")
 	}
@@ -294,7 +293,7 @@ func (currentROTI *ROTIEntity) GetMaxVote() float64 {
 func (currentROTI *ROTIEntity) VotesAverage() float64 {
 	var avg sql.NullFloat64
 
-	row, err := sqliteDatabase.Query("SELECT AVG(value) FROM vote WHERE roti =" + strconv.Itoa(int(currentROTI.id)))
+	row, err := sqliteDatabase.Query("SELECT AVG(value) FROM vote WHERE roti = ?", int(currentROTI.id))
 	if err != nil {
 		log.Fatal().Msgf("couldn't connect to database")
 	}
@@ -311,7 +310,7 @@ func (currentROTI *ROTIEntity) VotesAverage() float64 {
 func (currentROTI *ROTIEntity) ListFeedbacks() (feedbacks []string) {
 	var feedback string
 	var value float32
-	row, err := sqliteDatabase.Query("SELECT value, feedback FROM vote WHERE roti =" + strconv.Itoa(int(currentROTI.id)))
+	row, err := sqliteDatabase.Query("SELECT value, feedback FROM vote WHERE roti = ?", int(currentROTI.id))
 	if err != nil {
 		log.Fatal().Msgf("couldn't connect to database")
 	}
