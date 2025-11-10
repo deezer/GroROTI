@@ -1,6 +1,9 @@
+version: 2
+
 before:
   hooks:
-    - go test
+    - go test ./...
+
 builds:
   - id: linux-amd64
     main: ./
@@ -19,6 +22,7 @@ builds:
     ldflags:
       - -extldflags "-static"
       - -s -w -X main.Version={{.Version}}
+
 dockers:
   - use: buildx
     goos: linux
@@ -38,12 +42,15 @@ dockers:
     extra_files:
       - config.toml
       - datadir/
+
 checksum:
   # https://goreleaser.com/customization/checksum/
   name_template: 'checksums.txt'
+
 snapshot:
   # https://goreleaser.com/customization/snapshots/
-  name_template: "{{ incpatch .Version }}-SNAPSHOT"
+  version_template: "{{ incpatch .Version }}-SNAPSHOT"
+
 source:
   # https://goreleaser.com/customization/source/
   enabled: true
