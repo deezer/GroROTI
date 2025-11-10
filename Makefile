@@ -1,6 +1,6 @@
 PACKAGE_NAME          := github.com/deezer/groroti
 BINARY_NAME           := groroti
-GOLANG_CROSS_VERSION  ?= v1.22.4
+GOLANG_CROSS_VERSION  ?= v1.25.3
 
 SYSROOT_DIR     ?= sysroots
 SYSROOT_ARCHIVE ?= sysroots.tar.bz2
