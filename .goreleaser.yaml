@@ -40,7 +40,7 @@ dockers:
       - "--label=org.opencontainers.image.source={{.GitURL}}"
       - "--label=org.opencontainers.image.licenses=MIT"
     extra_files:
-      - config.toml
+      - config.toml.default
       - datadir/
 
 checksum:

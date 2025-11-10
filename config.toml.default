@@ -1,0 +1,25 @@
+# GroROTI Configuration File
+# Copy this file to config.toml and adjust the values as needed
+# All these settings can also be set via environment variables
+
+# Server configuration
+server_addr = "0.0.0.0"
+server_port = 3000
+
+# Frontend URL (used for QR codes and links)
+frontend_url = "http://localhost:3000"
+
+# Vote configuration
+vote_step = 0.5
+
+# QR code size in pixels
+qr_code_size = 384
+
+# Clean ROTIs older than X days
+clean_over_time = 30
+
+# OpenTelemetry configuration
+enable_tracing = false
+otlp_endpoint = "localhost:4318"
+# otlp_basic_username = ""
+# otlp_basic_password = ""
