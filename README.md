@@ -143,6 +143,14 @@ SERVER_ADDR=127.0.0.1 SERVER_PORT=3000 FRONTEND_URL=http://localhost:3000 go run
 
 All building operations for the project (both binaries and docker images) are done using GoReleaser by default.
 
+### Build a local binary
+
+You can use the `install` target of the Makefile to build the binary for you
+
+```bash
+VERSION=1.2.3 make build
+```
+
 ### goreleaser
 
 Note: don't forget the prerequisites (see above). You can build it on any commit using the `--snapshot` goreleaser option:

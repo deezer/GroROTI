@@ -63,14 +63,14 @@ func run() (err error) {
 	services.Register()
 	addr := configRepository.BuildServerAddr()
 	log.Info().Msgf("Start listening on %s", addr)
-	http.ListenAndServe(addr, nil)
 
 	// Start HTTP server.
 	srv := &http.Server{
 		Addr:         addr,
 		BaseContext:  func(_ net.Listener) context.Context { return ctx },
-		ReadTimeout:  time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		Handler:      nil, // uses http.DefaultServeMux
 	}
 	srvErr := make(chan error, 1)
 
