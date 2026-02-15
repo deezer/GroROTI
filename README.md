@@ -23,13 +23,13 @@ You can download the linux binary for arm64 and amd64 in the [releases page](htt
 
 ### With the docker image
 
-Public docker images are available on [hub.docker.com](https://hub.docker.com/u/deezer).
+Public docker images are available on [GitHub Container Registry](https://github.com/deezer/GroROTI/pkgs/container/groroti).
 
 You can pull/run the latest version by running:
 
 ```bash
-docker pull deezer/groroti:latest
-docker run -p 3000:3000 -e FRONTEND_URL=https://groroti.mydomain.tld deezer/groroti
+docker pull ghcr.io/deezer/groroti:latest
+docker run -p 3000:3000 -e FRONTEND_URL=https://groroti.mydomain.tld ghcr.io/deezer/groroti:latest
 ```
 
 Aside from frontend URL, to customize other parameters, see [Configuration section](https://github.com/deezer/GroROTI?tab=readme-ov-file#Configuration) on this page.
@@ -93,7 +93,7 @@ clever deploy
 
 ## Configure it!
 
-You can customize some of the features of GroROTI:
+You can customize some of the features of GroROTI. All those fields are optional:
 
 * **configuration file path** - default is "config.toml", can be overridden with *GROROTI_CONFIG* environment variable
 * **server listening address** - default is "0.0.0.0", can be overridden with *SERVER_ADDR* environment variable or *server_addr* in configuration file
@@ -102,12 +102,34 @@ You can customize some of the features of GroROTI:
 * **vote input step** - default is "0.5" but this can be customized (to allow only int for example) with *VOTE_STEP* environment variable or *vote_step* in configuration file
 * **qr code size** - default is "384" (in pixels), can be overridden with *QR_CODE_SIZE* environment variable or *qr_code_size* in configuration file
 * **clean over time** - when a new ROTI is created, remove all ROTIs that are older than xxx. Default is 30 (in days), can be overridden with *CLEAN_OVER_TIME* environment variable or *clean_over_time* in configuration file
+* **enable tracing** - default is "false", can be overridden with *ENABLE_TRACING* environment variable or *enable_tracing* in configuration file
+* **otlp endpoint** - default is "localhost:4318", can be overridden with *OTLP_ENDPOINT* environment variable or *otlp_endpoint* in configuration file
+* **otlp HTTP basic auth username** - default is empty, which means no HTTP basic auth. Can be overridden with *OTLP_BASIC_USERNAME* environment variable or *otlp_basic_username* in configuration file
+* **otlp HTTP basic auth password** - default is empty, which means no HTTP basic auth. Can be overridden with *OTLP_BASIC_PASSWORD* environment variable or *otlp_basic_password* in configuration file
 
 ## Build it!
 
 ### Prerequisites
 
-This software requires Go 1.22+
+This software requires Go 1.25+
+
+To use gorelease in the Makefile to crosscompile to amd64 AND arm64, you need `make` and `docker` (Makefile doesn't work well with Podman)
+
+You may also need to run the following commands
+
+```bash
+mkdir datadir/ sysroot/
+touch config.toml
+```
+
+If you plan to use goreleaser and the cross compiling system, you'll need:
+- `pv`
+- `pbzip2`
+- sysroots folders (you can find an [oudated example here](https://github.com/goreleaser/goreleaser-cross-example-sysroot/tree/master), and the [documentation explains how to do it properly here](https://github.com/goreleaser/goreleaser-cross-example-sysroot/tree/master) using "[the script](https://github.com/goreleaser/goreleaser-cross/blob/master/scripts/sysroot-rsync.sh)")
+
+```bash
+git submodule add https://github.com/goreleaser/goreleaser-cross-example-sysroot.git sysroots
+```
 
 ### Run dev version
 
@@ -121,9 +143,17 @@ SERVER_ADDR=127.0.0.1 SERVER_PORT=3000 FRONTEND_URL=http://localhost:3000 go run
 
 All building operations for the project (both binaries and docker images) are done using GoReleaser by default.
 
+### Build a local binary
+
+You can use the `install` target of the Makefile to build the binary for you
+
+```bash
+VERSION=1.2.3 make build
+```
+
 ### goreleaser
 
-You can build it on any commit using the `--snapshot` goreleaser option:
+Note: don't forget the prerequisites (see above). You can build it on any commit using the `--snapshot` goreleaser option:
 
 ```bash
 make snapshot
@@ -146,9 +176,9 @@ Deezer staff can push a new release by tagging the git repository to create a ne
 ```bash
 git tag -a 1.0.0 -m "1.0.0 release"
 git push origin 1.0.0
-export GITHUB_TOKEN="ghx_xxxxxxxxxxxxxxxxxx" #or use ~/.config/goreleaser/github_token file
-goreleaser release
 ```
+
+This will trigger a github action that will test the code, build the binary, build the docker image and push it on ghcr.io.
 
 ### manually
 
@@ -160,6 +190,8 @@ docker build -t localgroroti .
 docker run -p 3000:3000 localgroroti
 ```
 
-## Additionnal licences
+Note: you can't use Goreleaser [without the "Pro" version when using Podman](https://goreleaser.com/customization/docker_manifest/#using-podman).
 
-fonts Luciole under Creative Commons Attribution 4.0 International Public License, © Laurent Bourcellier & Jonathan Perez. See [ReadMe.txt](internal/staticEmbed/static/ReadMe.txt) .
+## Additionnal licences (fonts)
+
+font **Luciole** under Creative Commons Attribution 4.0 International Public License, © Laurent Bourcellier & Jonathan Perez. See [ReadMe.txt](internal/staticEmbed/static/ReadMe.txt) .

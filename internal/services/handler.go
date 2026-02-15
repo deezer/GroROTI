@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"image/png"
@@ -13,6 +14,7 @@ import (
 	"github.com/deezer/groroti/internal/model"
 	"github.com/deezer/groroti/internal/staticEmbed"
 	"github.com/rs/zerolog/log"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -20,6 +22,7 @@ var (
 	ErrTemplateExecute   = errors.New("error while execution of template file")
 	ErrParsingToInt      = errors.New("error while parsing to int")
 	Version              string
+	tracer               trace.Tracer
 )
 
 type existingROTI struct {
@@ -40,6 +43,11 @@ func Register() *http.ServeMux {
 
 	// launch the periodic process that collects the metrics
 	recordMetrics()
+
+	// Set up OpenTelemetry tracer
+	if currentConfig.EnableTracing {
+		tracer = middlewares.TP.Tracer("github.com/deezer/groroti/internal/services")
+	}
 
 	// Prometheus + liveness/readiness
 	router.Handle("GET /-/liveness", NewHealthHandler())
@@ -72,6 +80,12 @@ func Register() *http.ServeMux {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+	var span trace.Span
+	if currentConfig.EnableTracing {
+		_, span = tracer.Start(r.Context(), "home")
+		defer span.End()
+	}
+
 	templateFilePath := "templates/index.html"
 	t, ok := staticEmbed.Templates[templateFilePath]
 	if !ok {
@@ -86,6 +100,9 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	template.List = model.ListROTIs()
 	template.Version = Version
 
+	if currentConfig.EnableTracing {
+		span.AddEvent("Start executing template")
+	}
 	err := t.Execute(w, template)
 	if err != nil {
 		log.Error().Err(ErrTemplateExecute)
@@ -94,6 +111,13 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func displayROTIHandler(w http.ResponseWriter, r *http.Request) {
+	var span trace.Span
+	var ctx context.Context
+	if currentConfig.EnableTracing {
+		ctx, span = tracer.Start(r.Context(), "display ROTI")
+		defer span.End()
+	}
+
 	var currentROTI model.ROTIEntity
 
 	rotiID, err := getIDFromURL(r, false)
@@ -118,7 +142,7 @@ func displayROTIHandler(w http.ResponseWriter, r *http.Request) {
 	// checks if QRcode exists or not. If not, generates one
 	strID := strconv.Itoa(rotiID)
 	if _, err := os.Stat("qr/qr" + strID + ".png"); errors.Is(err, os.ErrNotExist) {
-		if err := genQRCode(currentConfig.GetURL(), strID); err != nil {
+		if err := genQRCode(currentConfig.GetURL(), strID, ctx); err != nil {
 			log.Warn().Err(ErrQRCodeGeneration)
 		}
 	}
@@ -147,6 +171,10 @@ func displayROTIHandler(w http.ResponseWriter, r *http.Request) {
 
 	exportAsPNG(template)
 
+	if currentConfig.EnableTracing {
+		span.AddEvent("Start executing template")
+	}
+
 	err = t.Execute(w, template)
 	if err != nil {
 		log.Error().Err(ErrTemplateExecute)
@@ -164,12 +192,22 @@ func displayROTIHandlerLegacy(w http.ResponseWriter, r *http.Request) {
 }
 
 func displayVoteHandler(w http.ResponseWriter, r *http.Request) {
+	var span trace.Span
+	if currentConfig.EnableTracing {
+		_, span = tracer.Start(r.Context(), "display vote")
+		defer span.End()
+	}
+
 	var currentROTI model.ROTIEntity
 
 	rotiID, err := getIDFromURL(r, false)
 	if err != nil {
 		logErrorAndGoBackHome(err, w, r)
 		return
+	}
+
+	if currentConfig.EnableTracing {
+		span.AddEvent("get current ROTI")
 	}
 
 	currentROTI, err = model.GetROTI(model.ROTIID(rotiID))
@@ -199,6 +237,10 @@ func displayVoteHandler(w http.ResponseWriter, r *http.Request) {
 	template.HasFeedback = currentROTI.HasFeedback()
 	template.Version = Version
 
+	if currentConfig.EnableTracing {
+		span.AddEvent("Start executing template")
+	}
+
 	err = t.Execute(w, template)
 	if err != nil {
 		log.Error().Err(ErrTemplateExecute)
@@ -207,6 +249,12 @@ func displayVoteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func downloadPNGHandler(w http.ResponseWriter, r *http.Request) {
+	var span trace.Span
+	if currentConfig.EnableTracing {
+		_, span = tracer.Start(r.Context(), "download PNG")
+		defer span.End()
+	}
+
 	var currentROTI model.ROTIEntity
 
 	rotiID, err := getIDFromURL(r, false)
@@ -244,6 +292,12 @@ func downloadPNGHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func downloadCSVHandler(w http.ResponseWriter, r *http.Request) {
+	var span trace.Span
+	if currentConfig.EnableTracing {
+		_, span = tracer.Start(r.Context(), "download CSV")
+		defer span.End()
+	}
+
 	var currentROTI model.ROTIEntity
 
 	rotiID, err := getIDFromURL(r, false)
@@ -283,6 +337,12 @@ func downloadCSVHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postROTIHandler(w http.ResponseWriter, r *http.Request) {
+	var span trace.Span
+	if currentConfig.EnableTracing {
+		_, span = tracer.Start(r.Context(), "create ROTI")
+		defer span.End()
+	}
+
 	var rotiname string
 	var hide, feedback bool
 
@@ -306,6 +366,12 @@ func postROTIHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postVoteHandler(w http.ResponseWriter, r *http.Request) {
+	var span trace.Span
+	if currentConfig.EnableTracing {
+		_, span = tracer.Start(r.Context(), "create vote")
+		defer span.End()
+	}
+
 	rotiID, err := getIDFromURL(r, false)
 	if err != nil {
 		logErrorAndGoBackHome(err, w, r)
@@ -322,25 +388,25 @@ func postVoteHandler(w http.ResponseWriter, r *http.Request) {
 	// check vote validity
 	vote, err := model.CheckVote(r.FormValue("vote"))
 	if err != nil {
-		log.Error().Msgf(model.ErrInvalidVote.Error())
+		log.Error().Err(model.ErrInvalidVote).Msg("")
 		http.Redirect(w, r, "/roti/"+strconv.Itoa(rotiID), http.StatusNotAcceptable)
 		return
 	}
 
 	if hasVoted, _ := hasVotedForROTI(r, rotiID); hasVoted {
-		log.Warn().Msgf("User has already voted for ROTI " + strconv.Itoa(rotiID))
+		log.Warn().Msg("User has already voted for ROTI " + strconv.Itoa(rotiID))
 		http.Redirect(w, r, "/roti/"+strconv.Itoa(rotiID), http.StatusFound)
 		return
 	}
 
 	if err := currentROTI.AddVoteToROTI(vote, feedback); err != nil {
-		log.Warn().Msgf(err.Error())
+		log.Warn().Err(err).Msg("")
 		http.Redirect(w, r, "/roti/"+strconv.Itoa(rotiID), http.StatusFound)
 		return
 	}
 
 	// Put a cookie to mark that the user has voted for this ROTI
-	setVotedCookie(w, rotiID)
+	setVotedCookie(w, rotiID, r.Context())
 
 	http.Redirect(w, r, "/roti/"+strconv.Itoa(rotiID), http.StatusFound)
 }
