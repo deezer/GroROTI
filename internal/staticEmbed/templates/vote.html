@@ -1,41 +1,146 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="auto">
     <head>
         <meta charset="utf-8">
-        <link href="/static/simple.css" type="text/css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" media="screen" href="/static/Luciole-Regular.css" />
-        <title>🍖 - Vote for {{.RotiID}} - 🍖</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="color-scheme" content="light dark">
+        <link rel="stylesheet" href="/static/pico.classless.min.css">
+        <link rel="stylesheet" href="/static/Luciole-Regular.css">
+        <link rel="stylesheet" href="/static/groroti.css">
+        <title>🍖 Vote — ROTI {{.RotiID}}</title>
     </head>
     <body>
-        <h2>🍖 - ROTI {{.RotiID}} - 🍖</h2>
-        {{ if .Description}}
-        <h3>Meeting: {{.Description}}</h3>
-        {{ end }}
-        <form method="POST" action="/vote/{{.RotiID}}">
-            <div>
-                <input type="range" name="vote" value="3" min="1" max="5" step="{{.VoteStep}}" oninput="this.nextElementSibling.value = this.value" style="width:50%; margin-bottom:0; line-height:0"><output style="font-size: 2rem; text-align: right; display:inline-block; width:9%; line-height:0">3</output>
+        <header>
+            <h1>🍖 GroROTI</h1>
+        </header>
+
+        <main>
+            <div class="vote-card">
+                <h2 style="margin:0 0 0.25rem">ROTI {{.RotiID}}</h2>
+                {{ if .Description}}
+                <p style="margin:0 0 1rem; font-weight:600">{{.Description}}</p>
+                {{ end }}
+
+                <div class="vote-context">
+                    Could you have brought/gained more value if you had done <em>something else</em>?
+                </div>
+
+                <form method="POST" action="/vote/{{.RotiID}}">
+                    <div class="star-rating" id="star-rating" data-step="{{.VoteStep}}">
+                        <!-- injected by JS -->
+                    </div>
+                    <div class="star-labels">
+                        <span>Waste of time</span>
+                        <span>Couldn't be better</span>
+                    </div>
+
+                    <div class="vote-display" id="vote-display">Pick your rating</div>
+
+                    <input type="hidden" name="vote" id="vote-value" value="">
+
+                    {{ if .HasFeedback}}
+                    <label for="feedback">Optional feedback</label>
+                    <textarea name="feedback" id="feedback" rows="2" placeholder="What could have been improved?"></textarea>
+                    {{ end }}
+
+                    <input type="submit" value="Vote!" id="submit-btn" disabled aria-disabled="true">
+                </form>
+
+                <a href="/roti/{{.RotiID}}" class="back-link">← Back to results</a>
             </div>
-            {{ if .HasFeedback}}
-            <div>
-                <label for="feedback">Optional feedback:</label>
-                <textarea name="feedback" id="feedback" rows="1" cols="50"></textarea>
-            </div>
-            {{ end }}
-            <input type="submit" value="Vote!" style="font-size: 1.5rem"/>
-        </form>
+        </main>
 
-        <p>Can you help us rate this meeting/training/session value? Just answer this simple question: could you have brought/gained more value if you had done <i>something else</i>?</p>
-        <ul style="margin-top: 0px;">
-            <li>If it was a complete waste of your time, give a 1</li>
-            <li>If you can't imagine doing anything more useful than this, give a 5</li>
-            <li>If it was useful but you feel you could have done better, grade in between</li>
-        </ul>
-
-        <a class="back-to-roti" href="/roti/{{.RotiID}}">Back to ROTI {{.RotiID}} results</a>
-
-        <!-- Footer -->
         <footer>
-            Version: {{ .Version }} - made with love 💜 by <a href="https://github.com/deezer">@DeezerDevs</a>
+            Version: {{ .Version }} — made with love 💜 by <a href="https://github.com/deezer">@DeezerDevs</a>
         </footer>
+
+        <script>
+        (function() {
+            const container = document.getElementById('star-rating');
+            const voteInput = document.getElementById('vote-value');
+            const display   = document.getElementById('vote-display');
+            const submitBtn = document.getElementById('submit-btn');
+
+            const step     = parseFloat(container.dataset.step) || 1;
+            const halfStep = step <= 0.5;
+            const max      = 5;
+
+            let selectedValue = null;
+
+            // Build star elements
+            for (let i = 1; i <= max; i++) {
+                const wrap = document.createElement('span');
+                wrap.className = 'star-container empty';
+                wrap.dataset.pos = i;
+                wrap.setAttribute('role', 'button');
+                wrap.setAttribute('aria-label', 'Rate ' + (halfStep ? (i - 0.5) + ' or ' : '') + i + ' out of 5');
+                wrap.innerHTML = '<span class="star-bg">★</span><span class="star-fill">★</span>';
+
+                if (halfStep) {
+                    wrap.addEventListener('mousemove', e => onHoverMove(e, wrap, i));
+                    wrap.addEventListener('mouseleave', onHoverLeave);
+                    wrap.addEventListener('click', e => onClickHalf(e, wrap, i));
+                } else {
+                    wrap.addEventListener('mouseenter', () => onHoverFull(i));
+                    wrap.addEventListener('mouseleave', onHoverLeave);
+                    wrap.addEventListener('click', () => onClickFull(i));
+                }
+
+                container.appendChild(wrap);
+            }
+
+            function stars() {
+                return container.querySelectorAll('.star-container');
+            }
+
+            function setFill(value) {
+                stars().forEach(s => {
+                    const pos = parseFloat(s.dataset.pos);
+                    s.className = 'star-container ' +
+                        (value >= pos ? 'full' : (halfStep && value >= pos - 0.5) ? 'half' : 'empty');
+                });
+            }
+
+            function onHoverFull(pos) { setFill(pos); }
+
+            function onHoverMove(e, wrap, pos) {
+                const rect = wrap.getBoundingClientRect();
+                setFill((e.clientX - rect.left) < rect.width / 2 ? pos - 0.5 : pos);
+            }
+
+            function onHoverLeave() {
+                setFill(selectedValue !== null ? selectedValue : 0);
+            }
+
+            function triggerPop(pos) {
+                stars().forEach(s => {
+                    if (parseFloat(s.dataset.pos) <= pos) {
+                        s.classList.remove('pop');
+                        void s.offsetWidth;
+                        s.classList.add('pop');
+                    }
+                });
+            }
+
+            function select(val, pos) {
+                selectedValue = val;
+                setFill(val);
+                triggerPop(pos);
+                voteInput.value = val;
+                display.textContent = 'Your rating: ' + val + ' / 5';
+                display.className = 'vote-display selected';
+                submitBtn.disabled = false;
+                submitBtn.removeAttribute('aria-disabled');
+            }
+
+            function onClickFull(pos) { select(pos, pos); }
+
+            function onClickHalf(e, wrap, pos) {
+                const rect = wrap.getBoundingClientRect();
+                const val = (e.clientX - rect.left) < rect.width / 2 ? pos - 0.5 : pos;
+                select(val, pos);
+            }
+        })();
+        </script>
     </body>
-</html>    
+</html>
