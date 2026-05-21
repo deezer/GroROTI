@@ -1,49 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8">
-        <link href="/static/simple.css" type="text/css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" media="screen" href="/static/Luciole-Regular.css" />
-        <title>🍖 - GroROTI - 🍖</title>
-        <meta name="title" property="og:title" content="🍖 - GroROTI - 🍖">
-        <meta name="description"  property="og.description" content="GroROTI (Go Return On Time Invested) is a tool to gauge the quality of meetings, workshops, trainings. It's anonymous so people don't get biaised by seeing other people votes like in raised-hands ROTIs.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="color-scheme" content="light dark">
+        <link rel="stylesheet" href="/static/pico.classless.min.css">
+        <link rel="stylesheet" href="/static/Luciole-Regular.css">
+        <link rel="stylesheet" href="/static/groroti.css">
+        <title>🍖 GroROTI</title>
+        <meta name="title" property="og:title" content="🍖 GroROTI">
+        <meta name="description" property="og:description" content="GroROTI (Go Return On Time Invested) is a tool to gauge the quality of meetings, workshops, trainings. Anonymous so people don't get biased by seeing other votes.">
         <meta name="image" property="og:image" content="/static/groroti-logo.png">
     </head>
     <body>
-        <h2>🍖 - GroROTI - 🍖</h2>
-    
-        <p>GroROTI (Return On Time Invested) is a tool to gauge the quality of meetings, workshops, trainings. It's anonymous so people don't get biased seeing other's votes.</p>
-    
-        <form method="POST" action="/newroti">
-            <input type="text" id="rotiname" name="rotiname" placeholder="optional description">
-            <div>
-                <input type="checkbox" id="hide" name="hide">
-                <label for="hide">Hide this ROTI</label>
+        <header>
+            <h1>🍖 GroROTI</h1>
+            <p class="muted">Anonymous Return On Time Invested — for meetings, workshops & trainings</p>
+        </header>
+
+        <main>
+            <div class="home-layout">
+                <!-- Colonne gauche : formulaire + how it works -->
+                <div class="home-left">
+                    <div class="home-form-card">
+                        <h2>New ROTI</h2>
+                        <form method="POST" action="/newroti">
+                            <label for="rotiname">Description <span class="muted">(optional)</span></label>
+                            <input type="text" id="rotiname" name="rotiname" placeholder="e.g. Sprint review, team offsite…">
+                            <fieldset>
+                                <label>
+                                    <input type="checkbox" id="hide" name="hide">
+                                    Hide this ROTI from the home list
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="feedback" name="feedback" checked>
+                                    Enable feedback textbox
+                                </label>
+                            </fieldset>
+                            <input type="submit" value="Create ROTI">
+                        </form>
+                    </div>
+
+                    <details class="how-it-works">
+                        <summary>How it works 🏁</summary>
+                        <ol>
+                            <li>Create a new ROTI</li>
+                            <li>Share the link or QR code so people can vote anonymously</li>
+                            <li>Read the results</li>
+                        </ol>
+                    </details>
+                </div>
+
+                <!-- Colonne droite : liste -->
+                <div class="home-right">
+                    <div class="home-roti-list">
+                        <h3>Latest ROTIs</h3>
+                        {{if .List}}
+                        <ul class="roti-list">
+                            {{range .List}}
+                            <li><a href="/roti/{{.ID}}">{{.ID}}{{ if .Desc}} — {{.Desc}}{{ end }}</a></li>
+                            {{end}}
+                        </ul>
+                        {{else}}
+                        <p class="muted">No ROTIs yet. Create your first one above!</p>
+                        {{end}}
+                    </div>
+                </div>
             </div>
-            <div>
-                <input type="checkbox" id="feedback" name="feedback" checked />
-                <label for="feedback">Enable feedback textbox</label>
-            </div>
-            <input type="submit" value="Create ROTI" />
-        </form>
+        </main>
 
-        <h4>Getting started 🏁</h4>
-        <ol style="margin-top: 0px;">
-            <li>Create a new ROTI</li>
-            <li>Let people vote using the link (or scan the QR code)</li>
-            <li>Get the results
-        </ol>
-
-        <h4>Latest ROTIs</h4>
-        <ul style="margin-top: 0px;">
-            {{range .List}}
-            <li><a href="/roti/{{.ID}}">{{.ID}}{{ if .Desc}} - {{.Desc}}{{ end }}</a></li>
-            {{end}}
-        </ul>
-
-        <!-- Footer -->
         <footer>
-            Version: {{ .Version }} - made with love 💜 by <a href="https://github.com/deezer">@DeezerDevs</a>
+            Version: {{ .Version }} — made with love 💜 by <a href="https://github.com/deezer">@DeezerDevs</a>
         </footer>
     </body>
 </html>

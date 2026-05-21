@@ -1,46 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8">
-        <link href="/static/simple.css" type="text/css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" media="screen" href="/static/Luciole-Regular.css" />
-        <title>🍖 - ROTI {{.Id}} - 🍖</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="color-scheme" content="light dark">
+        <link rel="stylesheet" href="/static/pico.classless.min.css">
+        <link rel="stylesheet" href="/static/Luciole-Regular.css">
+        <link rel="stylesheet" href="/static/groroti.css">
+        <title>🍖 ROTI {{.Id}}</title>
     </head>
     <body>
-        <h2>🍖 - ROTI {{.Id}} - 🍖</h2>
-        {{ if .Description}}
-        <h3>Meeting: {{.Description}}</h3>
-        {{ end }}
-        <h4 style="margin-top: 0px;">Average ROTI: {{.Avg}} | Min: {{.Min}} | Max: {{.Max}}</h4>
-        <h4 style="margin-top: 0px;">Number of votes: {{.NumVotes}}</h4>
+        <header>
+            <h1>🍖 GroROTI</h1>
+        </header>
 
-        {{ if .Feedbacks }}
-        <h4>Feedbacks:</h4>
-        <ul style="margin-top: 0px;">
-            {{range .Feedbacks}}
-            <li style="overflow: auto;">{{ . }}</li>
-            {{end}}
-        </ul>
-        {{ end }}
+        <main>
+            <!-- QR code à gauche, stats 2x2 à droite -->
+            <div class="share-section">
+                <div class="qr-block">
+                    <p class="roti-id">ROTI {{.Id}}</p>
+                    {{ if .Description}}
+                    <p class="roti-desc">{{.Description}}</p>
+                    {{ end }}
+                    <img src='/qr/qr{{.Id}}.png' alt="QR code for ROTI {{.Id}}">
+                    <p class="muted">Scan to vote</p>
+                </div>
+                <div>
+                    <div class="avg-stars" id="avg-stars" style="text-align:center; font-size:2.4rem; letter-spacing:0.15rem; margin-bottom:0.75rem;"></div>
+                    <div class="share-stats">
+                        <div class="score-item primary">
+                            <div class="score-label">Average</div>
+                            <div class="score-value">{{.Avg}}</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label">Votes</div>
+                            <div class="score-value">{{.NumVotes}}</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label">Min</div>
+                            <div class="score-value">{{.Min}}</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label">Max</div>
+                            <div class="score-value">{{.Max}}</div>
+                        </div>
+                    </div>
 
-        {{ if .UserHasVoted }}
-        <input type="submit" value="You voted. Thanks!" style="font-size: 1.5rem; background-color: grey;" disabled>
-        {{ else }}
-        <form method="POST" action="/displayvote/{{.Id}}">
-            <input type="submit" value="Vote" style="font-size: 1.5rem;">
-        </form>
-        {{ end }}
+                    <div style="margin-top: 1rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                        {{ if .UserHasVoted }}
+                        <button disabled aria-disabled="true">You voted. Thanks! 🎉</button>
+                        {{ else }}
+                        <form method="POST" action="/displayvote/{{.Id}}" style="margin:0">
+                            <input type="submit" value="Vote now" style="width:auto; padding:0.6rem 1.5rem; margin:0;">
+                        </form>
+                        {{ end }}
+                        <a href="{{.Url}}/roti/{{.Id}}" style="font-size:0.85rem; word-break:break-all;">{{.Url}}/roti/{{.Id}}</a>
+                    </div>
+                </div>
+            </div>
 
-        <p style="margin-bottom: 0px;">Scan this QR-code to access this page:</p>
-        <img id='flag' src='/qr/qr{{.Id}}.png'>
-        
-        <div>Direct link to voting page: <a href="{{.Url}}/roti/{{.Id}}">{{.Url}}/roti/{{.Id}}</a></div>
-        <div>Download ROTI {{.Id}} results: <a href="/downpng/{{.Id}}">as PNG</a> / <a href="/downcsv/{{.Id}}">as CSV</a></div>
-        <a class="back-to-index" href="/">Or go back to home 🏠</a>
+            {{ if .Feedbacks }}
+            <h3>Feedbacks</h3>
+            <ul class="feedback-list">
+                {{range .Feedbacks}}
+                <li>{{ . }}</li>
+                {{end}}
+            </ul>
+            {{ end }}
 
-        <!-- Footer -->
+            <div class="bottom-actions">
+                <a href="/">← Back to home</a>
+                <div class="download-links">
+                    <span class="muted">Download:</span>
+                    <a href="/downpng/{{.Id}}" class="action-btn">PNG</a>
+                    <a href="/downcsv/{{.Id}}" class="action-btn">CSV</a>
+                </div>
+            </div>
+        </main>
+
         <footer>
-            Version: {{ .Version }} - made with love 💜 by <a href="https://github.com/deezer">@DeezerDevs</a>
+            Version: {{ .Version }} — made with love 💜 by <a href="https://github.com/deezer">@DeezerDevs</a>
         </footer>
+
+        <script>
+        (function() {
+            // Avg stars
+            const avg = parseFloat("{{.Avg}}");
+            const el = document.getElementById('avg-stars');
+            if (el && !isNaN(avg)) {
+                let html = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (avg >= i) {
+                        html += '<span style="color:#f5a623">★</span>';
+                    } else if (avg >= i - 0.5) {
+                        html += '<span style="background:linear-gradient(90deg,#f5a623 50%,var(--pico-muted-border-color) 50%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">★</span>';
+                    } else {
+                        html += '<span style="color:var(--pico-muted-border-color)">★</span>';
+                    }
+                }
+                el.innerHTML = html;
+            }
+
+            // Feedback badges — parse "(3.5) some text"
+            document.querySelectorAll('.feedback-list li').forEach(li => {
+                const match = li.textContent.match(/^\(([^)]+)\)\s*(.*)/s);
+                if (match) {
+                    li.innerHTML =
+                        '<span class="feedback-score">★ ' + match[1] + '</span>' +
+                        '<span class="feedback-text">' + match[2] + '</span>';
+                }
+            });
+        })();
+        </script>
     </body>
 </html>
