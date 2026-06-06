@@ -38,6 +38,11 @@
 
                     <input type="hidden" name="vote" id="vote-value" value="">
 
+                    {{ if .RequireName}}
+                    <label for="voter_name">Your name</label>
+                    <input type="text" name="voter_name" id="voter_name" placeholder="e.g. Jane Doe" required>
+                    {{ end }}
+
                     {{ if .HasFeedback}}
                     <label for="feedback">Optional feedback</label>
                     <textarea name="feedback" id="feedback" rows="2" placeholder="What could have been improved?"></textarea>
