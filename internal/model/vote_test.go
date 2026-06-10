@@ -33,10 +33,11 @@ func initVoteTest(values []float64, feedbacks []string) (ROTIEntity, error) {
 		description: "test",
 		hide:        false,
 		feedback:    true,
+		requireName: false,
 	}
 
 	for i, value := range values {
-		err := roti.AddVoteToROTI(value, feedbacks[i])
+		err := roti.AddVoteToROTI(value, feedbacks[i], "")
 		if err != nil {
 			return roti, err
 		}

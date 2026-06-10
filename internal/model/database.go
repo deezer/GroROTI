@@ -57,6 +57,7 @@ func initTables(db *sql.DB) {
 		"description" TEXT,
 		"hide" INTEGER,
 		"feedback" INTEGER DEFAULT 0,
+		"require_name" INTEGER DEFAULT 0,
         "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	  );`
 
@@ -64,7 +65,8 @@ func initTables(db *sql.DB) {
 		"id" TEXT NOT NULL PRIMARY KEY,		
 		"value" INTEGER,
 		"roti" INTEGER,
-		"feedback" TEXT
+		"feedback" TEXT,
+		"voter_name" TEXT
 	  );`
 
 	rotiStatement, err := db.Prepare(createROTITable)
@@ -130,6 +132,34 @@ func addMissingColumns(db *sql.DB) {
 		}
 
 		log.Info().Msg("'created_at' column added to 'roti' table")
+	}
+
+	if !columnExists(db, "roti", "require_name") {
+		addRequireNameToROTITable := `ALTER TABLE roti ADD COLUMN "require_name" INTEGER DEFAULT 0;`
+		dbStatement, err := db.Prepare(addRequireNameToROTITable)
+		if err != nil {
+			log.Fatal().Msg(err.Error())
+		}
+		_, err = dbStatement.Exec()
+		if err != nil {
+			log.Fatal().Msg(err.Error())
+		}
+
+		log.Info().Msg("'require_name' column added to 'roti' table")
+	}
+
+	if !columnExists(db, "vote", "voter_name") {
+		addVoterNameToVoteTable := `ALTER TABLE vote ADD COLUMN "voter_name" TEXT;`
+		dbStatement, err := db.Prepare(addVoterNameToVoteTable)
+		if err != nil {
+			log.Fatal().Msg(err.Error())
+		}
+		_, err = dbStatement.Exec()
+		if err != nil {
+			log.Fatal().Msg(err.Error())
+		}
+
+		log.Info().Msg("'voter_name' column added to 'vote' table")
 	}
 
 	// look for rows that don't have a value for created_at

@@ -20,6 +20,7 @@ type ROTIEntity struct {
 	description string
 	hide        bool
 	feedback    bool
+	requireName bool
 }
 
 type ROTIID int
@@ -44,49 +45,50 @@ func NewROTIID() (rotiID ROTIID) {
 	return
 }
 
-func NewROTIEntity(id ROTIID, description string, hide, feedback bool) (roti ROTIEntity) {
+func NewROTIEntity(id ROTIID, description string, hide, feedback, requireName bool) (roti ROTIEntity) {
 	roti.id = id
 	roti.description = description
 	roti.hide = hide
 	roti.feedback = feedback
+	roti.requireName = requireName
 
 	return
 }
 
 func GetROTI(rotiid ROTIID) (roti ROTIEntity, err error) {
 	var description string
-	var hide, feedback bool
+	var hide, feedback, requireName bool
 
-	row, err := sqliteDatabase.Query("SELECT description,hide,feedback FROM roti WHERE rotiid = ?", int(rotiid))
+	row, err := sqliteDatabase.Query("SELECT description,hide,feedback,require_name FROM roti WHERE rotiid = ?", int(rotiid))
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
 	defer row.Close()
 
 	row.Next()
-	err = row.Scan(&description, &hide, &feedback)
+	err = row.Scan(&description, &hide, &feedback, &requireName)
 	if err != nil {
 		return ROTIEntity{}, err
 	}
-	return NewROTIEntity(rotiid, description, hide, feedback), nil
+	return NewROTIEntity(rotiid, description, hide, feedback, requireName), nil
 }
 
 func insertROTI(db *sql.DB, roti ROTIEntity) {
 	id := int(roti.GetID())
-	log.Info().Msgf("inserting ROTI record %d (%s) hidden:%t feedback:%t", id, roti.description, roti.hide, roti.feedback)
-	insertROTISQL := `INSERT INTO ROTI(rotiid, description, hide, feedback) VALUES (?, ?, ?, ?)`
+	log.Info().Msgf("inserting ROTI record %d (%s) hidden:%t feedback:%t requireName:%t", id, roti.description, roti.hide, roti.feedback, roti.requireName)
+	insertROTISQL := `INSERT INTO ROTI(rotiid, description, hide, feedback, require_name) VALUES (?, ?, ?, ?, ?)`
 	statement, err := db.Prepare(insertROTISQL)
 
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
-	_, err = statement.Exec(id, roti.description, roti.hide, roti.feedback)
+	_, err = statement.Exec(id, roti.description, roti.hide, roti.feedback, roti.requireName)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
 }
 
-func CreateROTI(description string, hide, feedback bool, clean int) (rotiID ROTIID) {
+func CreateROTI(description string, hide, feedback, requireName bool, clean int) (rotiID ROTIID) {
 	// before doing anything, run a check to see if we can clean some old ROTIs
 	log.Info().Msgf("searching for opportunistic cleaning on the ROTI database")
 	cleanOldROTIs(sqliteDatabase, clean)
@@ -109,7 +111,7 @@ func CreateROTI(description string, hide, feedback bool, clean int) (rotiID ROTI
 		panic(ErrNoFreeIDs)
 	}
 
-	insertROTI(sqliteDatabase, NewROTIEntity(rotiID, description, hide, feedback))
+	insertROTI(sqliteDatabase, NewROTIEntity(rotiID, description, hide, feedback, requireName))
 
 	return
 }
@@ -232,12 +234,16 @@ func (currentROTI *ROTIEntity) HasFeedback() bool {
 	return currentROTI.feedback
 }
 
-func (currentROTI *ROTIEntity) AddVoteToROTI(value float64, feedback string) (err error) {
+func (currentROTI *ROTIEntity) RequiresName() bool {
+	return currentROTI.requireName
+}
+
+func (currentROTI *ROTIEntity) AddVoteToROTI(value float64, feedback string, voterName string) (err error) {
 	currentVote, err := NewVoteEntity(value)
 	if err != nil {
 		return fmt.Errorf("%w: %s", ErrInvalidVoteID, err)
 	}
-	insertVote(sqliteDatabase, currentVote, currentROTI.id, feedback)
+	insertVote(sqliteDatabase, currentVote, currentROTI.id, feedback, voterName)
 	return nil
 }
 
@@ -309,18 +315,25 @@ func (currentROTI *ROTIEntity) VotesAverage() float64 {
 
 func (currentROTI *ROTIEntity) ListFeedbacks() (feedbacks []string) {
 	var feedback string
+	var voterName string
 	var value float32
-	row, err := sqliteDatabase.Query("SELECT value, feedback FROM vote WHERE roti = ?", int(currentROTI.id))
+	row, err := sqliteDatabase.Query("SELECT value, feedback, voter_name FROM vote WHERE roti = ?", int(currentROTI.id))
 	if err != nil {
 		log.Fatal().Msgf("couldn't connect to database")
 	}
 	defer row.Close()
 	for row.Next() {
-		if err := row.Scan(&value, &feedback); err != nil {
+		if err := row.Scan(&value, &feedback, &voterName); err != nil {
 			log.Error().Msgf("couldn't scan values : %s", err.Error())
 		}
-		if feedback != "" {
-			feedbacks = append(feedbacks, fmt.Sprintf("(%.1f) %s", value, feedback))
+		if feedback != "" || voterName != "" {
+			if voterName != "" && feedback != "" {
+				feedbacks = append(feedbacks, fmt.Sprintf("(%.1f) %s — %s", value, voterName, feedback))
+			} else if voterName != "" {
+				feedbacks = append(feedbacks, fmt.Sprintf("(%.1f) %s", value, voterName))
+			} else if feedback != "" {
+				feedbacks = append(feedbacks, fmt.Sprintf("(%.1f) %s", value, feedback))
+			}
 		}
 	}
 	return

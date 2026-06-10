@@ -70,7 +70,7 @@ func TestHomeHandler(t *testing.T) {
 
 func generateTestsROTIs() (existingROTI int, nonExistingROTI int) {
 	// create a roti and get the ID
-	rotiID := model.CreateROTI("test", false, false, 30)
+	rotiID := model.CreateROTI("test", false, false, false, 30)
 	existingROTI = rotiID.Int()
 
 	// then create an id from a roti that doesn't exist
@@ -138,7 +138,7 @@ func TestDisplayVoteHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := currentROTI.AddVoteToROTI(3.0, "ok"); err != nil {
+	if err := currentROTI.AddVoteToROTI(3.0, "ok", ""); err != nil {
 		t.Fatal(err)
 	}
 
@@ -236,7 +236,7 @@ func TestPostVoteHandler(t *testing.T) {
 	router := http.DefaultServeMux
 	router.HandleFunc("/vote/{rotiid}", postVoteHandler)
 
-	rotiID := model.CreateROTI("test", true, true, 30)
+	rotiID := model.CreateROTI("test", true, true, false, 30)
 
 	testCases := []struct {
 		query              string

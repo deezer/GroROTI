@@ -229,12 +229,14 @@ func displayVoteHandler(w http.ResponseWriter, r *http.Request) {
 		VoteStep    string
 		Description string
 		HasFeedback bool
+		RequireName bool
 		Version     string
 	}
 	template.RotiID = strconv.Itoa(rotiID)
 	template.VoteStep = fmt.Sprintf("%f", currentConfig.VoteStep)
 	template.Description = currentROTI.GetDescription()
 	template.HasFeedback = currentROTI.HasFeedback()
+	template.RequireName = currentROTI.RequiresName()
 	template.Version = Version
 
 	if currentConfig.EnableTracing {
@@ -344,7 +346,7 @@ func postROTIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var rotiname string
-	var hide, feedback bool
+	var hide, feedback, requireName bool
 
 	// get ROTI name from form if present. "" if not
 	if err := r.ParseForm(); err != nil {
@@ -360,7 +362,11 @@ func postROTIHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Form.Get("feedback") == "on" {
 		feedback = true
 	}
-	rotiID := model.CreateROTI(rotiname, hide, feedback, currentConfig.CleanOverTime)
+	requireName = false
+	if r.Form.Get("require_name") == "on" {
+		requireName = true
+	}
+	rotiID := model.CreateROTI(rotiname, hide, feedback, requireName, currentConfig.CleanOverTime)
 
 	http.Redirect(w, r, "/roti/"+strconv.Itoa(int(rotiID)), http.StatusSeeOther)
 }
@@ -385,6 +391,7 @@ func postVoteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	feedback := r.FormValue("feedback")
+	voterName := r.FormValue("voter_name")
 	// check vote validity
 	vote, err := model.CheckVote(r.FormValue("vote"))
 	if err != nil {
@@ -399,7 +406,7 @@ func postVoteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := currentROTI.AddVoteToROTI(vote, feedback); err != nil {
+	if err := currentROTI.AddVoteToROTI(vote, feedback, voterName); err != nil {
 		log.Warn().Err(err).Msg("")
 		http.Redirect(w, r, "/roti/"+strconv.Itoa(rotiID), http.StatusFound)
 		return

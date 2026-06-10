@@ -35,7 +35,7 @@ func TestGetROTI(t *testing.T) {
 	defer removeData()
 
 	rotidesc := "test"
-	rotiid := CreateROTI(rotidesc, false, false, 30)
+	rotiid := CreateROTI(rotidesc, false, false, false, 30)
 
 	testedRoti, err := GetROTI(rotiid)
 	if err != nil {
@@ -57,8 +57,8 @@ func TestListROTIs(t *testing.T) {
 	InitDatabase()
 	defer removeData()
 
-	rotiid1 := CreateROTI("test1", false, false, 30)
-	rotiid2 := CreateROTI("test2", false, false, 30)
+	rotiid1 := CreateROTI("test1", false, false, false, 30)
+	rotiid2 := CreateROTI("test2", false, false, false, 30)
 
 	rotiList := []ShortROTIInfo{
 		{ID: rotiid2, Desc: "test2"},

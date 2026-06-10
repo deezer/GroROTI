@@ -17,8 +17,9 @@ var (
 )
 
 type VoteEntity struct {
-	id    VoteID
-	value float64
+	id        VoteID
+	value     float64
+	voterName string
 }
 
 type VoteID string
@@ -35,6 +36,10 @@ func (currentVote *VoteEntity) GetVote() float64 {
 	return currentVote.value
 }
 
+func (currentVote *VoteEntity) GetVoterName() string {
+	return currentVote.voterName
+}
+
 func NewVoteEntity(value float64) (vote VoteEntity, err error) {
 	uuid, err := uuid.NewRandom()
 	if err != nil {
@@ -47,15 +52,15 @@ func NewVoteEntity(value float64) (vote VoteEntity, err error) {
 	return
 }
 
-func insertVote(db *sql.DB, vote VoteEntity, rotiid ROTIID, feedback string) {
+func insertVote(db *sql.DB, vote VoteEntity, rotiid ROTIID, feedback string, voterName string) {
 	log.Info().Msgf("Inserting Vote record %s for ROTI %d", vote.id, int(rotiid))
-	insertVoteSQL := `INSERT INTO vote(id, value, roti, feedback) VALUES (?, ?, ?, ?)`
+	insertVoteSQL := `INSERT INTO vote(id, value, roti, feedback, voter_name) VALUES (?, ?, ?, ?, ?)`
 	statement, err := db.Prepare(insertVoteSQL)
 
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
-	_, err = statement.Exec(vote.id, vote.value, rotiid, feedback)
+	_, err = statement.Exec(vote.id, vote.value, rotiid, feedback, voterName)
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
