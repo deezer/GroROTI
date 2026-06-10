@@ -105,9 +105,13 @@
             document.querySelectorAll('.feedback-list li').forEach(li => {
                 const match = li.textContent.match(/^\(([^)]+)\)\s*(.*)/s);
                 if (match) {
-                    li.innerHTML =
-                        '<span class="feedback-score">★ ' + match[1] + '</span>' +
-                        '<span class="feedback-text">' + match[2] + '</span>';
+                    const score = document.createElement('span');
+                    score.className = 'feedback-score';
+                    score.textContent = '★ ' + match[1];
+                    const text = document.createElement('span');
+                    text.className = 'feedback-text';
+                    text.textContent = match[2];
+                    li.replaceChildren(score, text);
                 }
             });
         })();
