@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"image/draw"
 	"io/fs"
+	"strings"
 
 	"github.com/deezer/groroti/internal/staticEmbed"
 	"github.com/goki/freetype/truetype"
@@ -68,7 +69,19 @@ func exportAsPNG(roti existingROTI) *image.RGBA {
 
 func exportAsCSV(roti existingROTI) (csv_strings []string) {
 	csv_strings = []string{"ROTI ID,Description,Average ROTI,Min ROTI,Max ROTI,Number of Votes",
-		fmt.Sprintf("%d,%s,%.2f,%.2f,%.2f,%d", roti.Id, roti.Description, roti.Avg, roti.Min, roti.Max, roti.NumVotes)}
+		fmt.Sprintf("%d,%s,%.2f,%.2f,%.2f,%d", roti.Id, csvSafeField(roti.Description), roti.Avg, roti.Min, roti.Max, roti.NumVotes)}
 
 	return csv_strings
+}
+
+// csvSafeField quotes a free-text field for CSV output and neutralizes
+// spreadsheet formula injection: a value starting with =, +, -, @, tab or CR
+// is prefixed with a single quote so spreadsheet apps treat it as text rather
+// than a formula. The value is also wrapped in double quotes (with internal
+// quotes doubled) so commas and newlines can't break the CSV structure.
+func csvSafeField(s string) string {
+	if s != "" && strings.ContainsRune("=+-@\t\r", rune(s[0])) {
+		s = "'" + s
+	}
+	return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
 }
