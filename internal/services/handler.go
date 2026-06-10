@@ -141,7 +141,7 @@ func displayROTIHandler(w http.ResponseWriter, r *http.Request) {
 
 	// checks if QRcode exists or not. If not, generates one
 	strID := strconv.Itoa(rotiID)
-	if _, err := os.Stat("qr/qr" + strID + ".png"); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat("data/qr/qr" + strID + ".png"); errors.Is(err, os.ErrNotExist) {
 		if err := genQRCode(currentConfig.GetURL(), strID, ctx); err != nil {
 			log.Warn().Err(ErrQRCodeGeneration)
 		}
