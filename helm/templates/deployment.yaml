@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "groroti.fullname" . }}
   labels:
-    {{- include "groroti.labels" . | nindent 4 }}s
+    {{- include "groroti.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
